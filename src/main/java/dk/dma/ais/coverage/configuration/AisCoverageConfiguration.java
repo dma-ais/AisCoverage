@@ -40,38 +40,37 @@ public class AisCoverageConfiguration {
 
     private AisBusConfiguration aisbusConfiguration;
     private WebServerConfiguration serverConfiguration;
-    private double latSize=0.0225225225;
-    private double lonSize=0.0386812541;
+    private double latSize = 0.0225225225;
+    private double lonSize = 0.0386812541;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
     private HashMap<String, Station> sourcenames = new HashMap<String, Station>();
     private String filename = null;
 
- 
-
     public String getFilename() {
-		return filename;
-	}
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-	public HashMap<String, Station> getSourceNameMap()
-    {
-    	return sourcenames;
+        return filename;
     }
-    public void setSourceNameMap(HashMap<String, Station> map)
-    {
-    	sourcenames = map;
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
-    
-	public DatabaseConfiguration getDatabaseConfiguration() {
-		return dbConf;
-	}
 
-	public void setDatabaseConfiguration(DatabaseConfiguration dbConf) {
-		this.dbConf = dbConf;
-	}
+    public HashMap<String, Station> getSourceNameMap() {
+        return sourcenames;
+    }
 
-	public AisCoverageConfiguration() {
+    public void setSourceNameMap(HashMap<String, Station> map) {
+        sourcenames = map;
+    }
+
+    public DatabaseConfiguration getDatabaseConfiguration() {
+        return dbConf;
+    }
+
+    public void setDatabaseConfiguration(DatabaseConfiguration dbConf) {
+        this.dbConf = dbConf;
+    }
+
+    public AisCoverageConfiguration() {
 
     }
 
@@ -91,20 +90,23 @@ public class AisCoverageConfiguration {
     public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
     }
-    
-    public void setLatSize(double latSize){
-    	this.latSize=latSize;
+
+    public void setLatSize(double latSize) {
+        this.latSize = latSize;
     }
-    public void setLonSize(double lonSize){
-    	this.lonSize=lonSize;
+
+    public void setLonSize(double lonSize) {
+        this.lonSize = lonSize;
     }
-    public double getLatSize(){
-    	return this.latSize;
+
+    public double getLatSize() {
+        return this.latSize;
     }
-    public double getLonSize(){
-    	return this.lonSize;
+
+    public double getLonSize() {
+        return this.lonSize;
     }
-    
+
     public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
         JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
         Marshaller m = context.createMarshaller();
@@ -118,7 +120,5 @@ public class AisCoverageConfiguration {
         Unmarshaller um = context.createUnmarshaller();
         return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
     }
-    
-    
 
 }

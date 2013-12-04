@@ -19,62 +19,70 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Ship implements Serializable {
-	
-//	private static final long serialVersionUID = 1L;
-	private long mmsi;
-	private CustomMessage lastMessage = null;
-	private List<CustomMessage> messageBuffer = new ArrayList<CustomMessage>();
-//	private Cell lastCell = null;
-	private ShipClass shipClass;
-	
-	public enum ShipClass{
-		CLASS_A, CLASS_B
-	}
-//	public Cell getLastCell() {
-//		return lastCell;
-//	}
-//	public void setLastCell(Cell lastCell) {
-//		this.lastCell = lastCell;
-//	}
-	public Ship(Long mmsi, ShipClass shipClass) {
-		this.mmsi = mmsi;
-		this.shipClass = shipClass;
-	}
-	public void setLastMessage(CustomMessage message){
-		this.lastMessage = message;
-	}
-	public CustomMessage getLastMessage(){
-		return lastMessage;
-	}
-	public void addToBuffer(CustomMessage m){
-		messageBuffer.add(m);
-	}
-	public List<CustomMessage> getMessages(){
-		return messageBuffer;
-	}
-	public void emptyBuffer(){
-		CustomMessage last = getLastMessageInBuffer();
-		messageBuffer.clear();
-		messageBuffer.add(last); //We still want the last message in the buffer
-	}
-	public ShipClass getShipClass() {
-		return shipClass;
-	}
-	public void setShipClass(ShipClass shipClass) {
-		this.shipClass = shipClass;
-	}
-	public CustomMessage getFirstMessageInBuffer(){
-		return messageBuffer.get(0);
-	}
-	public CustomMessage getLastMessageInBuffer(){
-		return messageBuffer.get(messageBuffer.size()-1);
-	}
-	public long getMmsi(){
-		return mmsi;
-	}
-	
+    private static final long serialVersionUID = 1L;
 
+    private long mmsi;
+    private CustomMessage lastMessage = null;
+    private List<CustomMessage> messageBuffer = new ArrayList<CustomMessage>();
+    // private Cell lastCell = null;
+    private ShipClass shipClass;
+
+    public enum ShipClass {
+        CLASS_A, CLASS_B
+    }
+
+    // public Cell getLastCell() {
+    // return lastCell;
+    // }
+    // public void setLastCell(Cell lastCell) {
+    // this.lastCell = lastCell;
+    // }
+    public Ship(Long mmsi, ShipClass shipClass) {
+        this.mmsi = mmsi;
+        this.shipClass = shipClass;
+    }
+
+    public void setLastMessage(CustomMessage message) {
+        this.lastMessage = message;
+    }
+
+    public CustomMessage getLastMessage() {
+        return lastMessage;
+    }
+
+    public void addToBuffer(CustomMessage m) {
+        messageBuffer.add(m);
+    }
+
+    public List<CustomMessage> getMessages() {
+        return messageBuffer;
+    }
+
+    public void emptyBuffer() {
+        CustomMessage last = getLastMessageInBuffer();
+        messageBuffer.clear();
+        messageBuffer.add(last); // We still want the last message in the buffer
+    }
+
+    public ShipClass getShipClass() {
+        return shipClass;
+    }
+
+    public void setShipClass(ShipClass shipClass) {
+        this.shipClass = shipClass;
+    }
+
+    public CustomMessage getFirstMessageInBuffer() {
+        return messageBuffer.get(0);
+    }
+
+    public CustomMessage getLastMessageInBuffer() {
+        return messageBuffer.get(messageBuffer.size() - 1);
+    }
+
+    public long getMmsi() {
+        return mmsi;
+    }
 
 }

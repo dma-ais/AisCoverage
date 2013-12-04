@@ -40,7 +40,7 @@ import dk.dma.enav.util.function.Consumer;
 public class AisCoverage {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverage.class);
-    
+
     @GuardedBy("AisCoverage")
     private static AisCoverage instance;
 
@@ -58,7 +58,7 @@ public class AisCoverage {
 
         // Create AisBus
         aisBus = conf.getAisbusConfiguration().getInstance();
-        
+
         // Create web server
         if (conf.getServerConfiguration() != null) {
             webServer = new WebServer(conf.getServerConfiguration());
@@ -79,33 +79,33 @@ public class AisCoverage {
                 handler.receiveUnfiltered(packet);
             }
         });
-        
-        if(conf.getFilename() != null){
-        	try {
-            	aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(conf.getFilename()));
-            	aisReader.registerPacketHandler(new Consumer<AisPacket>() {            
-    			    @Override
-    			    public void accept(AisPacket aisPacket) {
-    			    	handler.receiveUnfiltered(aisPacket);
-    			    }
-    			});
-    			aisReader.start();
-    			LOG.info("File reader started - Not aisbus");
-    		} catch (FileNotFoundException e) {
-    			e.printStackTrace();
-    		}
+
+        if (conf.getFilename() != null) {
+            try {
+                aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(conf.getFilename()));
+                aisReader.registerPacketHandler(new Consumer<AisPacket>() {
+                    @Override
+                    public void accept(AisPacket aisPacket) {
+                        handler.receiveUnfiltered(aisPacket);
+                    }
+                });
+                aisReader.start();
+                LOG.info("File reader started - Not aisbus");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
     public void start() {
         // Start aisBus
-    	if(aisReader == null){
-	        aisBus.start();
-	        aisBus.startConsumers();
-	        aisBus.startProviders();
-	        LOG.info("aisbus startet");
-    	}
+        if (aisReader == null) {
+            aisBus.start();
+            aisBus.startConsumers();
+            aisBus.startProviders();
+            LOG.info("aisbus startet");
+        }
         // Start web server
         if (webServer != null) {
             try {
@@ -123,15 +123,22 @@ public class AisCoverage {
         aisBus.cancel();
         LOG.info("aisbus stopped");
     }
-    
-    public AisCoverageConfiguration getConf() {	return conf;	}
-    public CoverageHandler getHandler() {	return handler;	}
-    
+
+    public AisCoverageConfiguration getConf() {
+        return conf;
+    }
+
+    public CoverageHandler getHandler() {
+        return handler;
+    }
+
     public static synchronized AisCoverage create(AisCoverageConfiguration conf) {
         instance = new AisCoverage(conf);
         return instance;
     }
-    
-    public static synchronized AisCoverage get() {	return instance;	}
+
+    public static synchronized AisCoverage get() {
+        return instance;
+    }
 
 }

@@ -15,66 +15,67 @@ import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.Source;
 
 public class CSVGenerator {
-	private static final Logger LOG = LoggerFactory.getLogger(KMLGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KMLGenerator.class);
 
-//	public static void generateKML(CoverageCalculator calc, String path) {
-	public static void generateCSV(Collection<Source> grids, double latSize, double lonSize, int multiplicity, HttpServletResponse response) {
+    // public static void generateKML(CoverageCalculator calc, String path) {
+    public static void generateCSV(Collection<Source> grids, double latSize, double lonSize, int multiplicity,
+            HttpServletResponse response) {
 
-		LOG.info("startet csv generation");
-		
-		HttpServletResponse out = response;
-		
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-		
-		String fileName = ("aiscoverage-" + dateFormat.format(date)+ "_latSize "+latSize+"_lonSize "+lonSize+"multiplicationfactor"+multiplicity+".csv");
-//		out.setContentType("application/vnd.google-earth.kml+xml"); 
-		out.setContentType("text/csv");
-		out.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        LOG.info("startet csv generation");
 
-			writeLine("latstart, longstart, latend, longend, received, missing, coverage percentage", out);
+        HttpServletResponse out = response;
 
-			for (Source grid : grids) {
-				generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize*multiplicity, lonSize*multiplicity);
-			}
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
 
+        String fileName = ("aiscoverage-" + dateFormat.format(date) + "_latSize " + latSize + "_lonSize " + lonSize
+                + "multiplicationfactor" + multiplicity + ".csv");
+        // out.setContentType("application/vnd.google-earth.kml+xml");
+        out.setContentType("text/csv");
+        out.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-			//TODO check hvad det er der giver en aw snap internal error fejl efter kml generate er kørt
-			try {
-				out.getOutputStream().close();
-			} catch (IOException e) {
-				LOG.error(e.getMessage());
-				e.printStackTrace();
-			}
-			LOG.info("Finished csv generation");
-	}
-	
-	private static void writeLine(String line, HttpServletResponse out){
-		try{
-			out.getOutputStream().write((line + "\n").getBytes());
-			out.getOutputStream().flush();
-		}catch(Exception e){
-			LOG.error(e.getMessage());
-		}
-	}
-	
-	private static void generateGrid(String bsMmsi, Collection<Cell> cells,
-			HttpServletResponse out, double latSize, double lonSize) {
+        writeLine("latstart, longstart, latend, longend, received, missing, coverage percentage", out);
 
-			for (Cell cell : cells) {
+        for (Source grid : grids) {
+            generateGrid(grid.getIdentifier(), grid.getGrid().values(), out, latSize * multiplicity, lonSize * multiplicity);
+        }
 
-				//We ignore cells, where average number of messages, is below 10 per ship
-				//Maybe there is a bug in AISMessage system, that assign some messages to wrong Base Stations
-				//Bug found and fixed
-//				if (cell.NOofReceivedSignals / cell.ships.size() > 10) {
+        // TODO check hvad det er der giver en aw snap internal error fejl efter kml generate er kørt
+        try {
+            out.getOutputStream().close();
+        } catch (IOException e) {
+            LOG.error(e.getMessage());
+            e.printStackTrace();
+        }
+        LOG.info("Finished csv generation");
+    }
 
-				writeLine(cell.getLatitude()+","+cell.getLongitude()+","+(cell.getLatitude()+latSize)+","+(cell.getLongitude()+lonSize)+","+cell.getNOofReceivedSignals()+","+cell.getNOofMissingSignals()+","+(cell.getCoverage()*100), out);
-					
-//				}
+    private static void writeLine(String line, HttpServletResponse out) {
+        try {
+            out.getOutputStream().write((line + "\n").getBytes());
+            out.getOutputStream().flush();
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
+    }
 
-			}
-	}
+    private static void generateGrid(String bsMmsi, Collection<Cell> cells, HttpServletResponse out, double latSize, double lonSize) {
 
+        for (Cell cell : cells) {
 
-	
+            // We ignore cells, where average number of messages, is below 10 per ship
+            // Maybe there is a bug in AISMessage system, that assign some messages to wrong Base Stations
+            // Bug found and fixed
+            // if (cell.NOofReceivedSignals / cell.ships.size() > 10) {
+
+            writeLine(
+                    cell.getLatitude() + "," + cell.getLongitude() + "," + (cell.getLatitude() + latSize) + ","
+                            + (cell.getLongitude() + lonSize) + "," + cell.getNOofReceivedSignals() + ","
+                            + cell.getNOofMissingSignals() + "," + (cell.getCoverage() * 100), out);
+
+            // }
+
+        }
+    }
+
 }

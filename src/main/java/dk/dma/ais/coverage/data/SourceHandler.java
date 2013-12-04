@@ -21,72 +21,72 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dk.dma.ais.coverage.calculator.AbstractCalculator;
-import dk.dma.ais.coverage.calculator.geotools.Helper;
-import dk.dma.ais.coverage.event.AisEvent;
-
 
 public class SourceHandler implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
+    private static final long serialVersionUID = 1L;
+    private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
 
-	private AbstractCalculator calculator;
-	
-	
-	public SourceHandler(AbstractCalculator calculator){
-		this.calculator = calculator;
-	}
-	public SourceHandler()
-	{
-		
-	}
-	
-	/*
-	 * Create grid associated to a specific transponder
-	 */
-	public Source createGrid(String bsMmsi){
-		Source grid = new Source(bsMmsi);
-		baseStations.put(bsMmsi, grid);
-		
-//		AisEvent event = new AisEvent();
-//		event.setEvent(AisEvent.Event.BS_ADDED);
-//		event.setSource(this);
-//		event.setEventObject(grid);
-//		ProjectHandler.getInstance().broadcastEvent(event);
+    // private AbstractCalculator calculator;
 
-		return grid;
-	}
-	
-	public void setAllVisible(boolean b){
-		Collection<Source> basestations = baseStations.values();
-		for (Source baseStation : basestations) {	
-			setVisible(baseStation.getIdentifier(), b);
-		}
-	}
-	public void setVisible(String mmsi, boolean b){
-		Source baseStation = baseStations.get(mmsi);
-		if(baseStation != null){
-			baseStation.setVisible(b);
-			
-//			ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_VISIBILITY_CHANGED, calculator, baseStation));	
-		}
-	}	
-	public Source getGrid(String bsMmsi){
-		return baseStations.get(bsMmsi);
-	}
-	public Map<String, Source> getBaseStations() {
-		return baseStations;
-	}
-//	public double getLatSize() {
-//		return latSize;
-//	}
-//	public void setLatSize(double latSize) {
-//		this.latSize = latSize;
-//	}
-//	public double getLonSize() {
-//		return lonSize;
-//	}
-//	public void setLonSize(double lonSize) {
-//		this.lonSize = lonSize;
-//	}
+    public SourceHandler(AbstractCalculator calculator) {
+        // this.calculator = calculator;
+    }
+
+    public SourceHandler() {
+
+    }
+
+    /*
+     * Create grid associated to a specific transponder
+     */
+    public Source createGrid(String bsMmsi) {
+        Source grid = new Source(bsMmsi);
+        baseStations.put(bsMmsi, grid);
+
+        // AisEvent event = new AisEvent();
+        // event.setEvent(AisEvent.Event.BS_ADDED);
+        // event.setSource(this);
+        // event.setEventObject(grid);
+        // ProjectHandler.getInstance().broadcastEvent(event);
+
+        return grid;
+    }
+
+    public void setAllVisible(boolean b) {
+        Collection<Source> basestations = baseStations.values();
+        for (Source baseStation : basestations) {
+            setVisible(baseStation.getIdentifier(), b);
+        }
+    }
+
+    public void setVisible(String mmsi, boolean b) {
+        Source baseStation = baseStations.get(mmsi);
+        if (baseStation != null) {
+            baseStation.setVisible(b);
+
+            // ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_VISIBILITY_CHANGED, calculator,
+            // baseStation));
+        }
+    }
+
+    public Source getGrid(String bsMmsi) {
+        return baseStations.get(bsMmsi);
+    }
+
+    public Map<String, Source> getBaseStations() {
+        return baseStations;
+    }
+    // public double getLatSize() {
+    // return latSize;
+    // }
+    // public void setLatSize(double latSize) {
+    // this.latSize = latSize;
+    // }
+    // public double getLonSize() {
+    // return lonSize;
+    // }
+    // public void setLonSize(double lonSize) {
+    // this.lonSize = lonSize;
+    // }
 }

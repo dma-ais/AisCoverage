@@ -23,40 +23,40 @@ import javax.ws.rs.core.MultivaluedMap;
  * Helper class that wraps a javax.ws.rs.core.MultivaluedMap
  */
 public class QueryParams {
-    
+
     private final MultivaluedMap<String, String> queryParams;
-    
+
     public QueryParams(MultivaluedMap<String, String> queryParams) {
         Objects.requireNonNull(queryParams);
         this.queryParams = queryParams;
     }
-    
+
     public String getFirst(String key) {
         return queryParams.getFirst(key);
     }
-    
+
     public boolean containsKey(String key) {
         return queryParams.containsKey(key);
     }
-    
+
     public Integer getInt(String key) {
         String valStr = queryParams.getFirst(key);
         if (valStr == null) {
             return null;
         }
-        try { 
+        try {
             return Integer.parseInt(valStr);
         } catch (NumberFormatException e) {
             return null;
         }
     }
-    
+
     public Double getDouble(String key) {
         String valStr = queryParams.getFirst(key);
         if (valStr == null) {
             return null;
         }
-        try { 
+        try {
             return Double.parseDouble(valStr);
         } catch (NumberFormatException e) {
             return null;

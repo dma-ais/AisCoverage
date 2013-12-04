@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class QueryParams {
-	public Double latStart=null, lonStart=null, latEnd=null, lonEnd=null;
-	public Map<String, Boolean> sources=new HashMap<String,Boolean>();
-	public Integer multiplicationFactor= null;
-	public Date startDate=null, endDate=null;
+    public Double latStart = null, lonStart = null, latEnd = null, lonEnd = null;
+    public Map<String, Boolean> sources = new HashMap<String, Boolean>();
+    public Integer multiplicationFactor = null;
+    public Date startDate = null, endDate = null;
 }

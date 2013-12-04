@@ -1,4 +1,5 @@
 package dk.dma.ais.coverage.data;
+
 //package dk.dma.ais.coverage.data;
 //
 //import java.net.UnknownHostException;
@@ -328,4 +329,4 @@ package dk.dma.ais.coverage.data;
 //		}
 //		
 //
-//	}
+// }

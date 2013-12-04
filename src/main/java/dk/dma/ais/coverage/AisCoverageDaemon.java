@@ -16,7 +16,6 @@
 package dk.dma.ais.coverage;
 
 import java.io.FileNotFoundException;
-import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,19 +26,16 @@ import com.google.inject.Injector;
 import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.commons.app.AbstractDaemon;
 
-
-
 /**
  * AIS coverage analyzer daemon
  */
 public class AisCoverageDaemon extends AbstractDaemon {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageDaemon.class);
-    
 
     @Parameter(names = "-file", description = "AisCoverage configuration file")
     String confFile = "coverage-sample.xml";
-    
+
     private AisCoverage aisCoverage;
 
     @Override
@@ -54,16 +50,16 @@ public class AisCoverageDaemon extends AbstractDaemon {
             LOG.error(e.getMessage());
             return;
         }
-        
-        if(!conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly") && 
-        		!conf.getDatabaseConfiguration().getType().toLowerCase().equals("mongodb")){
-        	LOG.error("Unknown database type");
-        	return;
+
+        if (!conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")
+                && !conf.getDatabaseConfiguration().getType().toLowerCase().equals("mongodb")) {
+            LOG.error("Unknown database type");
+            return;
         }
 
         // Create and start
         aisCoverage = AisCoverage.create(conf);
-        
+
         aisCoverage.start();
     }
 
@@ -77,13 +73,13 @@ public class AisCoverageDaemon extends AbstractDaemon {
     }
 
     public static void main(String[] args) throws Exception {
-//        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {            
-//            @Override
-//            public void uncaughtException(Thread t, Throwable e) {
-//                LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
-//                System.exit(-1);
-//            }
-//        });
+        // Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+        // @Override
+        // public void uncaughtException(Thread t, Throwable e) {
+        // LOG.error("Uncaught exception in thread " + t.getClass().getCanonicalName() + ": " + e.getMessage(), t);
+        // System.exit(-1);
+        // }
+        // });
         new AisCoverageDaemon().execute(args);
     }
 

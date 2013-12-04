@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.analysis.coverage.configuration;
+package dk.dma.ais.coverage.configuration;
 
 import java.io.FileNotFoundException;
 
@@ -28,28 +28,25 @@ import dk.dma.ais.configuration.bus.AisBusConfiguration;
 import dk.dma.ais.configuration.bus.consumer.DistributerConsumerConfiguration;
 import dk.dma.ais.configuration.bus.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.configuration.filter.DuplicateFilterConfiguration;
-import dk.dma.ais.configuration.filter.FilterConfiguration;
-import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
-import dk.dma.ais.coverage.configuration.DatabaseConfiguration;
 
 public class ConfigurationTest {
-    
+
     @Test
     public void makeConfiguration() throws FileNotFoundException, JAXBException {
         String filename = "src/main/resources/coverage-test.xml";
         AisCoverageConfiguration conf = new AisCoverageConfiguration();
         AisBusConfiguration aisBusConf = new AisBusConfiguration();
-        
+
         // Provider
         TcpClientProviderConfiguration reader = new TcpClientProviderConfiguration();
         reader.getHostPort().add("ais163.sealan.dk:65262");
         aisBusConf.getProviders().add(reader);
-        
+
         // Unfiltered consumer
         DistributerConsumerConfiguration unfilteredDist = new DistributerConsumerConfiguration();
         unfilteredDist.setName("UNFILTERED");
         aisBusConf.getConsumers().add(unfilteredDist);
-        
+
         // Filtered consumer
         DistributerConsumerConfiguration filteredDist = new DistributerConsumerConfiguration();
         filteredDist.setName("FILTERED");
@@ -58,24 +55,23 @@ public class ConfigurationTest {
         aisBusConf.getConsumers().add(filteredDist);
         conf.setAisbusConfiguration(aisBusConf);
 
-        
         conf.setLatSize(1.5);
         conf.setLonSize(1.5);
         DatabaseConfiguration dbConf = new DatabaseConfiguration();
         conf.setDatabaseConfiguration(dbConf);
-//        dbConf.set
-//        dbConf.setName("MongoDB");
-//        dbConf.setAddr("localhost");
-//        dbConf.setPort(9999);
-//        conf.setDatabase("MemoryOnly");
-        
+        // dbConf.set
+        // dbConf.setName("MongoDB");
+        // dbConf.setAddr("localhost");
+        // dbConf.setPort(9999);
+        // conf.setDatabase("MemoryOnly");
+
         AisCoverageConfiguration.save(filename, conf);
-        
+
         conf = AisCoverageConfiguration.load(filename);
         AisBus aisBus = conf.getAisbusConfiguration().getInstance();
-        DistributerConsumer filtered = (DistributerConsumer)aisBus.getConsumer("FILTERED");
+        DistributerConsumer filtered = (DistributerConsumer) aisBus.getConsumer("FILTERED");
         Assert.assertNotNull(filtered);
-        DistributerConsumer unfiltered = (DistributerConsumer)aisBus.getConsumer("UNFILTERED");
+        DistributerConsumer unfiltered = (DistributerConsumer) aisBus.getConsumer("UNFILTERED");
         Assert.assertNotNull(unfiltered);
     }
 

@@ -4,62 +4,63 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExportShipTimeSpan {
-	
-	private List<LatLon> positions = new ArrayList<LatLon>();
-	public ExportShipTimeSpan(long time) {
-		firstMessage=time;
-		lastMessage=time;
-	}
 
-	public List<LatLon> getPositions() {
-		return positions;
-	}
+    private List<LatLon> positions = new ArrayList<LatLon>();
 
-	public void setPositions(List<LatLon> positions) {
-		this.positions = positions;
-	}
+    public ExportShipTimeSpan(long time) {
+        firstMessage = time;
+        lastMessage = time;
+    }
 
-	public long getFirstMessage() {
-		return firstMessage;
-	}
+    public List<LatLon> getPositions() {
+        return positions;
+    }
 
-	public void setFirstMessage(long firstMessage) {
-		this.firstMessage = firstMessage;
-	}
+    public void setPositions(List<LatLon> positions) {
+        this.positions = positions;
+    }
 
-	public long getLastMessage() {
-		return lastMessage;
-	}
+    public long getFirstMessage() {
+        return firstMessage;
+    }
 
-	public void setLastMessage(long lastMessage) {
-		this.lastMessage = lastMessage;
-	}
+    public void setFirstMessage(long firstMessage) {
+        this.firstMessage = firstMessage;
+    }
 
-	private long firstMessage, lastMessage;
-	
-	public class LatLon{
-		private float lat, lon;
+    public long getLastMessage() {
+        return lastMessage;
+    }
 
-		public LatLon(float lat, float lon) {
-			this.lat=lat;
-			this.lon=lon;
-		}
+    public void setLastMessage(long lastMessage) {
+        this.lastMessage = lastMessage;
+    }
 
-		public float getLat() {
-			return lat;
-		}
+    private long firstMessage, lastMessage;
 
-		public void setLat(float lat) {
-			this.lat = lat;
-		}
+    public class LatLon {
+        private float lat, lon;
 
-		public float getLon() {
-			return lon;
-		}
+        public LatLon(float lat, float lon) {
+            this.lat = lat;
+            this.lon = lon;
+        }
 
-		public void setLon(float lon) {
-			this.lon = lon;
-		}
-	}
-	
+        public float getLat() {
+            return lat;
+        }
+
+        public void setLat(float lat) {
+            this.lat = lat;
+        }
+
+        public float getLon() {
+            return lon;
+        }
+
+        public void setLon(float lon) {
+            this.lon = lon;
+        }
+    }
+
 }

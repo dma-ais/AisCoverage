@@ -20,12 +20,12 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
- * Embedded Jetty web server and servlet container using a web app context  
+ * Embedded Jetty web server and servlet container using a web app context
  */
 public class WebServer {
-    
+
     private final Server server;
-    
+
     public WebServer(WebServerConfiguration conf) {
         server = new Server(conf.getPort());
         // Sets setReuseAddress
@@ -36,11 +36,11 @@ public class WebServer {
         bb.setWar(conf.getWebappPath());
         server.setHandler(bb);
     }
-    
-    public void start() throws Exception {        
+
+    public void start() throws Exception {
         server.start();
     }
-    
+
     public void stop() throws Exception {
         server.stop();
     }
