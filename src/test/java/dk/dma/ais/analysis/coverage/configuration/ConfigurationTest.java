@@ -29,6 +29,8 @@ import dk.dma.ais.configuration.bus.consumer.DistributerConsumerConfiguration;
 import dk.dma.ais.configuration.bus.provider.TcpClientProviderConfiguration;
 import dk.dma.ais.configuration.filter.DuplicateFilterConfiguration;
 import dk.dma.ais.configuration.filter.FilterConfiguration;
+import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
+import dk.dma.ais.coverage.configuration.DatabaseConfiguration;
 
 public class ConfigurationTest {
     
