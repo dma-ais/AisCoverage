@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -144,15 +144,15 @@ public class CoverageHandler {
     }
 
     // int pr=0;
-    int unfiltCount = 0;
+    int unfiltCount;
     Date start = new Date();
-    long biggestDiff = 0;
-    long now = 0;
-    AisPacket lastTer = null;
-    long biggestDelay = 0;
-    int weird = 0;
-    int delayedMoreThanTen = 0;
-    int delayedLessThanTen = 0;
+    long biggestDiff;
+    long now;
+    AisPacket lastTer;
+    long biggestDelay;
+    int weird;
+    int delayedMoreThanTen;
+    int delayedLessThanTen;
 
     public void receiveUnfiltered(AisPacket packet) {
 
@@ -211,7 +211,7 @@ public class CoverageHandler {
 
     }
 
-    int filtCount = 0;
+    int filtCount;
 
     public void receiveFiltered(AisPacket packet) {
         AisMessage message = packet.tryGetAisMessage();
@@ -255,8 +255,9 @@ public class CoverageHandler {
             // System.out.println("yir"+cell.getNOofReceivedSignals());
         }
 
-        if (!celllist.isEmpty())
+        if (!celllist.isEmpty()) {
             map.latSize = Helper.latSize * multiplicationFactor;
+        }
 
         for (Cell cell : celllist) {
             Cell superCell = superMap.get(cell.getId());
@@ -265,9 +266,9 @@ public class CoverageHandler {
             } else {
                 ExportCell existing = JsonCells.get(cell.getId());
                 ExportCell theCell = JsonConverter.toJsonCell(cell, superCell, starttime, endtime);
-                if (existing == null)
+                if (existing == null) {
                     existing = JsonCells.put(cell.getId(), JsonConverter.toJsonCell(cell, superCell, starttime, endtime));
-                else if (theCell.getCoverage() > existing.getCoverage()) {
+                } else if (theCell.getCoverage() > existing.getCoverage()) {
                     JsonCells.put(cell.getId(), theCell);
                 }
             }

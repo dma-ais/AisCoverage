@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,8 +26,8 @@ public class Cell {
     // private static final long serialVersionUID = 1L;
     // private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
 
-    private int NOofReceivedSignals = 0;
-    private int NOofMissingSignals = 0;
+    private int NOofReceivedSignals;
+    private int NOofMissingSignals;
     private double latitude;
     private double longitude;
     // private String id;

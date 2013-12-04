@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.data;
 
 import java.util.Date;
@@ -24,8 +39,9 @@ public class SuperShip {
         int minutesSince = (int) ((timestamp.getTime() - Helper.analysisStarted.getTime()) / 1000 / 60);
         short hoursSince = (short) ((Helper.getFloorDate(timestamp).getTime() - Helper.analysisStarted.getTime()) / 1000 / 60 / 60);
         int minutesOffset = minutesSince - hoursSince * 60;
-        if (minutesSince < 0)
+        if (minutesSince < 0) {
             return;
+        }
 
         Hour hour = hours.get(hoursSince);
         if (hour == null) {
@@ -61,8 +77,8 @@ public class SuperShip {
 
         // Two integers represents 60 bits (60 minutes)
         // Indicating if a message was received in the corresponding minute
-        public int half1 = 0;
-        public int half2 = 0;
+        public int half1;
+        public int half2;
 
         /**
          * Sets the position at the given minute A position must not be more than 32,767*10 meters from offset We assume no ships
@@ -93,13 +109,15 @@ public class SuperShip {
             double p2Y = Helper.getProjection().lat2y(lon, lat);
             short xDistance = (short) ((p1X - p2X) / 10); // Distance to offset in xDistance*10 meters
             short yDistance = (short) ((p1Y - p2Y) / 10); // Distance to offset in yDistance*10 meters
-            if (xDistance == 0)
+            if (xDistance == 0) {
                 xDistance = 1;
-            if (yDistance == 0)
+            }
+            if (yDistance == 0) {
                 xDistance = 1;
-            if (xDistance > 32767 || yDistance > 32767)
+            }
+            if (xDistance > 32767 || yDistance > 32767) {
                 return; // Something wrong with this message
-
+            }
             // Set meters from offset at the right position field
             if (minute < 5) {
                 positions[0] = xDistance;
@@ -126,32 +144,39 @@ public class SuperShip {
             double p1X = Helper.getProjection().lon2x(lonOffset, latOffset);
             double p1Y = Helper.getProjection().lat2y(lonOffset, latOffset);
             if (minute < 5) {
-                if (positions[0] == 0)
+                if (positions[0] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[0] * 10), p1Y - (positions[1] * 10));
             } else if (minute < 15) {
-                if (positions[2] == 0)
+                if (positions[2] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[2] * 10), p1Y - (positions[3] * 10));
             } else if (minute < 25) {
-                if (positions[4] == 0)
+                if (positions[4] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[4] * 10), p1Y - (positions[5] * 10));
             } else if (minute < 35) {
-                if (positions[6] == 0)
+                if (positions[6] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[6] * 10), p1Y - (positions[7] * 10));
             } else if (minute < 45) {
-                if (positions[8] == 0)
+                if (positions[8] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[8] * 10), p1Y - (positions[9] * 10));
             } else if (minute < 55) {
-                if (positions[10] == 0)
+                if (positions[10] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[10] * 10), p1Y - (positions[11] * 10));
             } else {
-                if (positions[10] == 0)
+                if (positions[10] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().y2Lat(p1X - (positions[10] * 10), p1Y - (positions[11] * 10));
             }
         }
@@ -160,45 +185,54 @@ public class SuperShip {
             double p1X = Helper.getProjection().lon2x(lonOffset, latOffset);
             double p1Y = Helper.getProjection().lat2y(lonOffset, latOffset);
             if (minute < 5) {
-                if (positions[0] == 0)
+                if (positions[0] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[0] * 10), p1Y - (positions[1] * 10));
             } else if (minute < 15) {
-                if (positions[2] == 0)
+                if (positions[2] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[2] * 10), p1Y - (positions[3] * 10));
             } else if (minute < 25) {
-                if (positions[4] == 0)
+                if (positions[4] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[4] * 10), p1Y - (positions[5] * 10));
             } else if (minute < 35) {
-                if (positions[6] == 0)
+                if (positions[6] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[6] * 10), p1Y - (positions[7] * 10));
             } else if (minute < 45) {
-                if (positions[8] == 0)
+                if (positions[8] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[8] * 10), p1Y - (positions[9] * 10));
             } else if (minute < 55) {
-                if (positions[10] == 0)
+                if (positions[10] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[10] * 10), p1Y - (positions[11] * 10));
             } else {
-                if (positions[10] == 0)
+                if (positions[10] == 0) {
                     return 0;
+                }
                 return (float) Helper.getProjection().x2Lon(p1X - (positions[10] * 10), p1Y - (positions[11] * 10));
             }
         }
 
         public boolean gotSignal(int minute) {
             if (minute < 30) {
-                if ((half1 & (1 << minute)) == 0)
+                if ((half1 & (1 << minute)) == 0) {
                     return false;
+                }
                 return true;
             } else {
                 minute = minute - 30;
-                if ((half2 & (1 << minute)) == 0)
+                if ((half2 & (1 << minute)) == 0) {
                     return false;
+                }
                 return true;
             }
         }

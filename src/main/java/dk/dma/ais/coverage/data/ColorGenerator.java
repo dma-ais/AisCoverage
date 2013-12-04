@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.data;
 
 import java.awt.Color;
@@ -28,20 +43,21 @@ public class ColorGenerator {
 
             double coverage = c.getCoverage();
             Color color;
-            if (coverage < lowThreshold)
+            if (coverage < lowThreshold) {
                 color = colors[0];
-            else if (coverage < lowThreshold + incrementValue)
+            } else if (coverage < lowThreshold + incrementValue) {
                 color = colors[1];
-            else if (coverage < lowThreshold + (incrementValue * 2))
+            } else if (coverage < lowThreshold + (incrementValue * 2)) {
                 color = colors[2];
-            else if (coverage < lowThreshold + (incrementValue * 3))
+            } else if (coverage < lowThreshold + (incrementValue * 3)) {
                 color = colors[3];
-            else if (coverage < lowThreshold + (incrementValue * 4))
+            } else if (coverage < lowThreshold + (incrementValue * 4)) {
                 color = colors[4];
-            else if (coverage < highThreshold)
+            } else if (coverage < highThreshold) {
                 color = colors[5];
-            else
+            } else {
                 color = colors[6];
+            }
 
             return color;
         } catch (Exception e) {

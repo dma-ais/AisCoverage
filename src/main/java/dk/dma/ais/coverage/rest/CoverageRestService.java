@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -197,8 +197,8 @@ public class CoverageRestService {
                 if (activesbscell != null) {
                     int receivedsignals = cell.getNOofReceivedSignals(new Date(starttime), new Date(endtime));
                     dhCell.addReceivedSignals(receivedsignals);
-                    int sbstotalmessages = (activesbscell.getNOofReceivedSignals(new Date(starttime), new Date(endtime)) + activesbscell
-                            .getNOofMissingSignals(new Date(starttime), new Date(endtime)));
+                    int sbstotalmessages = activesbscell.getNOofReceivedSignals(new Date(starttime), new Date(endtime))
+                            + activesbscell.getNOofMissingSignals(new Date(starttime), new Date(endtime));
                     dhCell.addNOofMissingSignals(sbstotalmessages - receivedsignals);
                 }
 
@@ -391,12 +391,14 @@ public class CoverageRestService {
         TimeSpan first = null;
         TimeSpan previous = null;
         for (TimeSpan timeSpan : timeSpans) {
-            if (first == null)
+            if (first == null) {
                 first = timeSpan;
+            }
 
             long timeSinceLastTimeSpan = 0;
-            if (previous != null)
+            if (previous != null) {
                 timeSinceLastTimeSpan = Math.abs(timeSpan.getFirstMessage().getTime() - previous.getLastMessage().getTime()) / 1000 / 60;
+            }
 
             // last is determined by the order of reception, but it is not guaranteed that the tag is actually the last
             // from time, to time, data time, time since last time span, accumulated time, signals, distinct ships

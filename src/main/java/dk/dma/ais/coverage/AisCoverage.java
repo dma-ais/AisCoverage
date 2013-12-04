@@ -9,7 +9,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -37,7 +37,7 @@ import dk.dma.enav.util.function.Consumer;
  * AIS coverage analyzer
  */
 @ThreadSafe
-public class AisCoverage {
+public final class AisCoverage {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverage.class);
 
@@ -48,7 +48,7 @@ public class AisCoverage {
     private final CoverageHandler handler;
     private final AisBus aisBus;
     private final WebServer webServer;
-    private AisReader aisReader = null;
+    private AisReader aisReader;
 
     private AisCoverage(AisCoverageConfiguration conf) {
         this.conf = conf;

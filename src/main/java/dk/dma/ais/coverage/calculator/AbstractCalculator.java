@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.calculator;
 
 import java.io.Serializable;
@@ -42,21 +57,22 @@ import dk.dma.enav.model.geometry.Position;
 public abstract class AbstractCalculator implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    transient protected SphereProjection projection = new SphereProjection();
-    private int cellSize = 2500;
+    private static final Logger LOG = LoggerFactory.getLogger(AisCoverageGUI.class);
+
+    public HashMap<String, Station> sourcenames;
     // protected AisCoverageProject project;
     protected Map<ShipClass, ShipClass> allowedShipClasses = new ConcurrentHashMap<ShipClass, ShipClass>();
     protected Map<ShipType, ShipType> allowedShipTypes = new ConcurrentHashMap<ShipType, ShipType>();
     protected Map<Integer, Boolean> allowedShips = new ConcurrentHashMap<Integer, Boolean>();
-    protected CustomMessage firstMessage = null;
-    protected CustomMessage currentMessage = null;
+    protected CustomMessage firstMessage;
+    protected CustomMessage currentMessage;
     protected ICoverageData dataHandler = new OnlyMemoryData();
     protected double filterTimeDifference;
     protected int maxDistanceBetweenFirstAndLast = 2000;
-    public HashMap<String, Station> sourcenames;
     protected int minAllowedSpeed = 3;
     protected int maxAllowedSpeed = 50;
-    private static final Logger LOG = LoggerFactory.getLogger(AisCoverageGUI.class);
+    protected transient SphereProjection projection = new SphereProjection();
+    private int cellSize = 2500;
 
     public double getFilterTimeDifference() {
         return filterTimeDifference;
@@ -90,7 +106,7 @@ public abstract class AbstractCalculator implements Serializable {
         this.maxAllowedSpeed = maxAllowedSpeed;
     }
 
-    abstract public void calculate(CustomMessage m);
+    public abstract void calculate(CustomMessage m);
 
     /**
      * This is called by message handlers whenever a new message is received.
@@ -118,29 +134,32 @@ public abstract class AbstractCalculator implements Serializable {
         double expectedTransmittingFrequency;
         if (shipClass == ShipClass.CLASS_A) {
             if (rotating) {
-                if (sog < .2)
+                if (sog < .2) {
                     expectedTransmittingFrequency = 180;
-                else if (sog < 14)
+                } else if (sog < 14) {
                     expectedTransmittingFrequency = 3.33;
-                else if (sog < 23)
+                } else if (sog < 23) {
                     expectedTransmittingFrequency = 2;
-                else
+                } else {
                     expectedTransmittingFrequency = 2;
+                }
             } else {
-                if (sog < .2)
+                if (sog < .2) {
                     expectedTransmittingFrequency = 180;
-                else if (sog < 14)
+                } else if (sog < 14) {
                     expectedTransmittingFrequency = 10;
-                else if (sog < 23)
+                } else if (sog < 23) {
                     expectedTransmittingFrequency = 6;
-                else
+                } else {
                     expectedTransmittingFrequency = 2;
+                }
             }
         } else {
-            if (sog <= 2)
+            if (sog <= 2) {
                 expectedTransmittingFrequency = 180;
-            else
+            } else {
                 expectedTransmittingFrequency = 30;
+            }
         }
 
         return expectedTransmittingFrequency;
@@ -153,8 +172,9 @@ public abstract class AbstractCalculator implements Serializable {
      */
     public boolean filterMessage(CustomMessage customMessage) {
 
-        if (customMessage.getSog() < 3 || customMessage.getSog() > 50)
+        if (customMessage.getSog() < 3 || customMessage.getSog() > 50) {
             return true;
+        }
         if (customMessage.getCog() == 360) {
             return true;
         }
@@ -302,11 +322,12 @@ public abstract class AbstractCalculator implements Serializable {
 
             // hardcode sat status until aisbus supports pull requests..
             if (region != null) {
-                if (region.equals("802") || region.equals("804") || region.equals("810"))
+                if (region.equals("802") || region.equals("804") || region.equals("810")) {
                     sourceType = SourceType.SATELLITE;
+                }
             }
 
-            if (defaultID != "sat") {
+            if (defaultID.equals("sat")) {
                 if (bsmmsi == null) {
                     if (!region.equals("")) {
                         if (sourcenames.containsKey(region)) {
@@ -358,15 +379,17 @@ public abstract class AbstractCalculator implements Serializable {
         }
 
         // if no allowed ship types has been set, we process all ship types
-        if (!isShipAllowed(aisMessage))
+        if (!isShipAllowed(aisMessage)) {
             return null;
+        }
 
         // Handle position messages. If it's not a position message
         // the calculators can't use them
-        if (aisMessage instanceof AisPositionMessage)
+        if (aisMessage instanceof AisPositionMessage) {
             posMessage = (AisPositionMessage) aisMessage;
-        else
+        } else {
             return null;
+        }
 
         // Check if ship type is allowed
         // shipClass = extractShipClass(aisMessage);
@@ -458,7 +481,7 @@ public abstract class AbstractCalculator implements Serializable {
     }
 
     public double getTimeDifference(Long m1, Long m2) {
-        return ((double) Math.abs((m2 - m1)) / 1000);
+        return (double) Math.abs((m2 - m1) / 1000);
     }
 
     public Map<ShipClass, ShipClass> getAllowedShipClasses() {

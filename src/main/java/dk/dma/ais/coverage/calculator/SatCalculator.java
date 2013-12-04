@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.calculator;
 
 import java.util.ArrayList;
@@ -124,8 +139,9 @@ public class SatCalculator extends AbstractCalculator {
     public List<ExportShipTimeSpan> getShipDynamicTimeSpans(Date startTime, Date endTime, int shipMmsi) {
         System.out.println("shipmmsi: " + shipMmsi);
         SuperShip ss = superships.get(shipMmsi);
-        if (ss == null)
+        if (ss == null) {
             return null;
+        }
 
         List<ExportShipTimeSpan> result = new ArrayList<ExportShipTimeSpan>();
         short startHour = (short) ((startTime.getTime() - Helper.analysisStarted.getTime()) / 1000 / 60 / 60);
@@ -339,11 +355,13 @@ public class SatCalculator extends AbstractCalculator {
     @Override
     public void calculate(CustomMessage m) {
 
-        if (filterMessage(m))
+        if (filterMessage(m)) {
             return;
+        }
 
-        if (Helper.analysisStarted == null)
+        if (Helper.analysisStarted == null) {
             Helper.analysisStarted = Helper.getFloorDate(m.getTimestamp());
+        }
 
         // Register message in ship
         SuperShip supership = superships.get((int) m.getShipMMSI());
@@ -482,8 +500,9 @@ public class SatCalculator extends AbstractCalculator {
         if (customMessage.getCog() == 360) {
             return true;
         }
-        if (isDoublet(customMessage))
+        if (isDoublet(customMessage)) {
             return true;
+        }
 
         return false;
     }
@@ -514,8 +533,9 @@ public class SatCalculator extends AbstractCalculator {
         public int compare(TimeSpan a1, TimeSpan a2) {
             Date s1 = a1.getFirstMessage();
             Date s2 = a2.getFirstMessage();
-            if (!s1.before(s2))
+            if (!s1.before(s2)) {
                 return 1;
+            }
 
             return -1;
         }
@@ -527,8 +547,9 @@ public class SatCalculator extends AbstractCalculator {
 
             Date d1 = c1.getTimestamp();
             Date d2 = c2.getTimestamp();
-            if (!d1.before(d2))
+            if (!d1.before(d2)) {
                 return 1;
+            }
 
             return -1;
         }

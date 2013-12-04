@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.export;
 
 import java.io.IOException;
@@ -32,8 +47,8 @@ public class KMLGenerator {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        String fileName = ("aiscoverage-" + dateFormat.format(date) + "_latSize " + latSize + "_lonSize " + lonSize
-                + "multiplicationfactor" + multiplicity + ".kml");
+        String fileName = "aiscoverage-" + dateFormat.format(date) + "_latSize " + latSize + "_lonSize " + lonSize
+                + "multiplicationfactor" + multiplicity + ".kml";
         out.setContentType("application/vnd.google-earth.kml+xml");
         out.setHeader("Content-Disposition", "attachment; filename=" + fileName);
 
@@ -43,48 +58,48 @@ public class KMLGenerator {
         writeLine("<name>AIS Coverage</name>", out);
         writeLine("<open>1</open>", out);
         writeLine("<Style id=\"redStyle\">", out);
-        writeLine("	<IconStyle>", out);
-        writeLine("		<scale>1.3</scale>", out);
-        writeLine("		<Icon>", out);
-        writeLine("			<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
-        writeLine("		</Icon>", out);
-        writeLine("		<hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
-        writeLine("	</IconStyle>", out);
-        writeLine("	<LineStyle>", out);
-        writeLine("		<color>ff0000ff</color>", out);
-        writeLine("	</LineStyle>", out);
-        writeLine("	<PolyStyle>", out);
-        writeLine("		<color>ff0000ff</color>", out);
-        writeLine("	</PolyStyle>", out);
+        writeLine("    <IconStyle>", out);
+        writeLine("        <scale>1.3</scale>", out);
+        writeLine("        <Icon>", out);
+        writeLine("            <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
+        writeLine("        </Icon>", out);
+        writeLine("        <hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
+        writeLine("    </IconStyle>", out);
+        writeLine("    <LineStyle>", out);
+        writeLine("        <color>ff0000ff</color>", out);
+        writeLine("    </LineStyle>", out);
+        writeLine("    <PolyStyle>", out);
+        writeLine("        <color>ff0000ff</color>", out);
+        writeLine("    </PolyStyle>", out);
         writeLine("</Style>", out);
         writeLine("<Style id=\"orangeStyle\">", out);
-        writeLine("	<IconStyle>", out);
-        writeLine("		<scale>1.3</scale>", out);
-        writeLine("		<Icon>", out);
-        writeLine("			<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
-        writeLine("		</Icon>", out);
-        writeLine("		<hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
-        writeLine("	</IconStyle>", out);
-        writeLine("	<LineStyle>", out);
-        writeLine("		<color>ff00aaff</color>", out);
-        writeLine("	</LineStyle>", out);
-        writeLine("	<PolyStyle>", out);
-        writeLine("		<color>ff00aaff</color>", out);
-        writeLine("	</PolyStyle>", out);
+        writeLine("    <IconStyle>", out);
+        writeLine("        <scale>1.3</scale>", out);
+        writeLine("        <Icon>", out);
+        writeLine("            <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
+        writeLine("        </Icon>", out);
+        writeLine("        <hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
+        writeLine("    </IconStyle>", out);
+        writeLine("    <LineStyle>", out);
+        writeLine("        <color>ff00aaff</color>", out);
+        writeLine("    </LineStyle>", out);
+        writeLine("    <PolyStyle>", out);
+        writeLine("        <color>ff00aaff</color>", out);
+        writeLine("    </PolyStyle>", out);
         writeLine("</Style>", out);
         writeLine("<Style id=\"greenStyle\">", out);
-        writeLine("	<IconStyle>", out);
-        writeLine("		<scale>1.3</scale>", out);
-        writeLine("		<Icon>", out);
-        writeLine("			<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
-        writeLine("		</Icon>", out);
-        writeLine("		<hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
-        writeLine("	</IconStyle>", out);
-        writeLine("	<LineStyle>", out);
-        writeLine("		<color>ff00ff00</color>", out);
-        writeLine("	</LineStyle>", out);
-        writeLine("	<PolyStyle>", out);
-        writeLine("	<color>ff00ff55</color>", out);
+        writeLine("    <IconStyle>", out);
+        writeLine("        <scale>1.3</scale>", out);
+        writeLine("        <Icon>", out);
+        writeLine("            <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>", out);
+        writeLine("        </Icon>", out);
+        writeLine("        <hotSpot x=\"20\" y=\"2\" xunits=\"pixels\" yunits=\"pixels\"/>", out);
+        writeLine("    </IconStyle>", out);
+        writeLine("    <LineStyle>", out);
+        writeLine("        <color>ff00ff00</color>", out);
+        writeLine("    </LineStyle>", out);
+        writeLine("    <PolyStyle>", out);
+        writeLine("    <color>ff00ff55</color>", out);
         writeLine("</PolyStyle>", out);
         writeLine("</Style>", out);
 

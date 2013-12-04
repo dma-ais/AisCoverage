@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.calculator;
 
 import java.util.ArrayList;
@@ -36,7 +51,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
     private int degreesPerMinute = 20;
     private boolean ignoreRotation;
     private List<IAisEventListener> listeners = new ArrayList<IAisEventListener>();
-    public boolean debug = false;
+    public boolean debug;
     private LinkedHashMap<String, CustomMessage> doubletBuffer = new LinkedHashMap<String, CustomMessage>() {
         private static final long serialVersionUID = 1L;
 
@@ -78,8 +93,9 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
      */
     public void calculate(CustomMessage message) {
 
-        if (checkDoublets(message))
+        if (checkDoublets(message)) {
             return;
+        }
 
         Ship ship = dataHandler.getShip(message.getSourceMMSI(), message.getShipMMSI());
 
@@ -100,8 +116,9 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
         CustomMessage firstMessage = ship.getFirstMessageInBuffer();
         CustomMessage lastMessage = ship.getLastMessageInBuffer();
 
-        if (ship.getMessages().size() == 1)
+        if (ship.getMessages().size() == 1) {
             return;
+        }
 
         double timeDifference = this.getTimeDifference(firstMessage, lastMessage);
         // Check if it is time to process the buffer
@@ -181,7 +198,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
             // Finds lat/lon of each missing point and adds "missing signal" to
             // corresponding cell
             for (int i = 1; i <= missingMessages; i++) {
-                double xMissing = getX((i * expectedTransmittingFrequency), p1Time, p2Time, p1X, p2X);
+                double xMissing = getX(i * expectedTransmittingFrequency, p1Time, p2Time, p1X, p2X);
                 double yMissing = getY(i * expectedTransmittingFrequency, p1Time, p2Time, p1Y, p2Y);
 
                 // Add number of missing messages to cell
@@ -263,10 +280,11 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
 
         // Handle position messages. If it's not a position message
         // the calculators can't use them
-        if (aisMessage instanceof AisPositionMessage)
+        if (aisMessage instanceof AisPositionMessage) {
             posMessage = (AisPositionMessage) aisMessage;
-        else
+        } else {
             return null;
+        }
 
         // Check if ship type is allowed
         // shipClass = extractShipClass(aisMessage);
@@ -324,10 +342,12 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
      */
     private double angleDiff(double a, double b) {
         double difference = b - a;
-        while (difference < -180.0)
+        while (difference < -180.0) {
             difference += 360.0;
-        while (difference > 180.0)
+        }
+        while (difference > 180.0) {
             difference -= 360.0;
+        }
         return difference;
     }
 

@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.data.json;
 
 import java.util.ArrayList;
@@ -26,11 +41,13 @@ public class JsonConverter {
             }
             s.type = baseStation.getReceiverType().name();
 
-            if (baseStation.getLatitude() != null)
+            if (baseStation.getLatitude() != null) {
                 s.lat = baseStation.getLatitude();
+            }
 
-            if (baseStation.getLongitude() != null)
+            if (baseStation.getLongitude() != null) {
                 s.lon = baseStation.getLongitude();
+            }
 
             sourcesMap.put(s.mmsi, s);
         }
@@ -39,7 +56,7 @@ public class JsonConverter {
 
     public static ExportCell toJsonCell(Cell cell, Cell superCell, Date starttime, Date endtime) {
 
-        long expected = (superCell.getNOofReceivedSignals() + superCell.getNOofMissingSignals());
+        long expected = superCell.getNOofReceivedSignals() + superCell.getNOofMissingSignals();
         // System.out.println(superCell.getNOofMissingSignals());
 
         ExportCell Jcell = new ExportCell();
@@ -69,20 +86,23 @@ public class JsonConverter {
         for (TimeSpan timeSpan : timespans) {
             JsonTimeSpan jsonspan = new JsonTimeSpan();
 
-            if (first == null)
+            if (first == null) {
                 first = timeSpan;
+            }
 
             long timeSinceLastTimeSpan = 0;
-            if (previous != null)
+            if (previous != null) {
                 timeSinceLastTimeSpan = Math.abs(timeSpan.getFirstMessage().getTime() - previous.getLastMessage().getTime()) / 1000 / 60;
+            }
 
             // last is determined by the order of receival, but it is not guaranteed that the tag is actually the last
             // from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
             jsonspan.fromTime = timeSpan.getFirstMessage().getTime();
             jsonspan.toTime = timeSpan.getLastMessage().getTime();
             jsonspan.spanLength = (int) (Math.abs(timeSpan.getLastMessage().getTime() - timeSpan.getFirstMessage().getTime()) / 1000 / 60);
-            if (jsonspan.spanLength == 0)
+            if (jsonspan.spanLength == 0) {
                 jsonspan.spanLength = 1;
+            }
             jsonspan.timeSinceLastSpan = (int) timeSinceLastTimeSpan;
             jsonspan.accumulatedTime = (int) (Math.abs(timeSpan.getLastMessage().getTime() - first.getLastMessage().getTime()) / 1000 / 60);
             jsonspan.signals = timeSpan.getMessageCounterSat();

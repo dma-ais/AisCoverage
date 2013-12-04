@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.data;
 
 import java.util.ArrayList;
@@ -143,8 +158,9 @@ public class OnlyMemoryData implements ICoverageData {
                         if (cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd) {
 
                             // Only add if cell has received message n given timespan
-                            if (cell.getNOofReceivedSignals() > 0)
+                            if (cell.getNOofReceivedSignals() > 0) {
                                 cells.add(cell);
+                            }
                         }
                     }
                 }
@@ -156,8 +172,9 @@ public class OnlyMemoryData implements ICoverageData {
 
     @Override
     public List<Cell> getCells(QueryParams params) {
-        if (params == null)
+        if (params == null) {
             return getCells();
+        }
         return getCells(params.latStart, params.lonStart, params.latEnd, params.lonEnd, params.sources,
                 params.multiplicationFactor, params.startDate, params.endDate);
 

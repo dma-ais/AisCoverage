@@ -1,3 +1,18 @@
+/* Copyright (c) 2011 Danish Maritime Authority
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package dk.dma.ais.coverage.export;
 
 import java.awt.Color;
@@ -198,7 +213,7 @@ public class ChartGenerator {
             int totalDistinctShips = totalShips.size();
 
             // Draw terrestrial bar
-            double terrestrialCoverage = ((double) timeSpan.getDistinctShipsTerrestrial().size() / (double) totalDistinctShips);
+            double terrestrialCoverage = (double) timeSpan.getDistinctShipsTerrestrial().size() / (double) totalDistinctShips;
             long difference = timeSpan.getLastMessage().getTime() - timeSpan.getFirstMessage().getTime();
             long diffFromFloorDate = timeSpan.getFirstMessage().getTime() - floorDate.getTime();
             String label = "";
@@ -213,7 +228,7 @@ public class ChartGenerator {
             label = "";
             // Draw sat bar
             ig2.setColor(satBarColor);
-            double satCoverage = ((double) timeSpan.getDistinctShipsSat().size() / (double) totalDistinctShips);
+            double satCoverage = (double) timeSpan.getDistinctShipsSat().size() / (double) totalDistinctShips;
             if (satCoverage > .15) {
                 label = round(satCoverage * 100, 2) + "%";
             }
@@ -322,12 +337,12 @@ public class ChartGenerator {
         float fInverse = (float) (1.0 - fAmount);
 
         // I had to look up getting colour components in java. Google is good :)
-        float afOne[] = new float[3];
+        float[] afOne = new float[3];
         clOne.getColorComponents(afOne);
-        float afTwo[] = new float[3];
+        float[] afTwo = new float[3];
         clTwo.getColorComponents(afTwo);
 
-        float afResult[] = new float[3];
+        float[] afResult = new float[3];
         afResult[0] = afOne[0] * fAmount + afTwo[0] * fInverse;
         afResult[1] = afOne[1] * fAmount + afTwo[1] * fInverse;
         afResult[2] = afOne[2] * fAmount + afTwo[2] * fInverse;
@@ -445,8 +460,8 @@ public class ChartGenerator {
             long diffFromFloorDate = timeSpan.getFirstMessage().getTime() - floorDate.getTime();
             int x = (int) (Math.floor(diffFromFloorDate / 1000 / 60) + offset);
             int y = (int) (height - 1 - (timeSpan.getMessageCounterSat() * scale) - bottomOffset);
-            int barwidth = (int) (difference / 1000 / 60);
-            ig2.fillRect(x, y, barwidth, (int) Math.ceil((timeSpan.getMessageCounterSat() * scale)));
+            int barwidth = (int) difference / 1000 / 60;
+            ig2.fillRect(x, y, barwidth, (int) Math.ceil(timeSpan.getMessageCounterSat() * scale));
 
             // Draw counter label
             ig2.setColor(Color.black);
@@ -482,8 +497,8 @@ public class ChartGenerator {
         }
         drawBetweenBarLabel(last.getTime(), ceilDate.getTime(), 0);
         if (noOfNonContactPeriods > 0) {
-            avgBetweenBarWidth = (minutesNotCovered / noOfNonContactPeriods);
-            coverageRatio = ((double) (Math.round((double) minutesCovered / exactTimeDifference * 10000)) / 100);
+            avgBetweenBarWidth = minutesNotCovered / noOfNonContactPeriods;
+            coverageRatio = (double) Math.round((double) minutesCovered / exactTimeDifference * 10000) / 100;
         }
 
         drawHeader("Satellite-Only: Adaptive Periods");
@@ -530,7 +545,7 @@ public class ChartGenerator {
 
     public static double round(double value, int decimals) {
         int multi = (int) Math.pow(10, decimals);
-        int result = (int) Math.round((value * multi));
+        int result = (int) Math.round(value * multi);
 
         return (double) result / multi;
     }
@@ -558,7 +573,7 @@ public class ChartGenerator {
         }
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         TimeSpan s1 = new TimeSpan(new Date(1378065228317L));
         s1.setLastMessage(new Date(s1.getFirstMessage().getTime() + 1000 * 60 * 140));
         s1.setMessageCounterSat(1000);
@@ -737,7 +752,7 @@ public class ChartGenerator {
         drawBetweenBarLabel(last.getTime(), ceilDate.getTime(), 10);
 
         if (noOfNonContactPeriods > 0) {
-            avgBetweenBarWidth = (minutesNotCovered / noOfNonContactPeriods);
+            avgBetweenBarWidth = minutesNotCovered / noOfNonContactPeriods;
             // coverageRatio = ((double) (Math.round((double) minutesCovered / exactTimeDifference * 10000)) / 100);
         }
 
@@ -769,25 +784,32 @@ public class ChartGenerator {
             noOfNonContactPeriods++;
 
             // calculate between bar widths statistics
-            if (betweenBarWidth > maxBetweenBarWidth)
+            if (betweenBarWidth > maxBetweenBarWidth) {
                 maxBetweenBarWidth = betweenBarWidth;
+            }
 
             minutesNotCovered += betweenBarWidth;
 
             double widthInOurs = (double) betweenBarWidth / 60;
 
-            if (widthInOurs > 1)
+            if (widthInOurs > 1) {
                 periodsOverOne++;
-            if (widthInOurs > 2)
+            }
+            if (widthInOurs > 2) {
                 periodsOverTwo++;
-            if (widthInOurs > 3)
+            }
+            if (widthInOurs > 3) {
                 periodsOverThree++;
-            if (widthInOurs > 4)
+            }
+            if (widthInOurs > 4) {
                 periodsOverFour++;
-            if (widthInOurs > 6)
+            }
+            if (widthInOurs > 6) {
                 periodsOverSix++;
-            if (widthInOurs > 8)
+            }
+            if (widthInOurs > 8) {
                 periodsOverEight++;
+            }
         }
         ig2.setTransform(orig);
         ig2.setFont(defaultFont);
