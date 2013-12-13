@@ -15,9 +15,6 @@
  */
 package dk.dma.ais.coverage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
@@ -30,7 +27,6 @@ import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.coverage.web.WebServer;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.ais.reader.AisReaders;
 import dk.dma.enav.util.function.Consumer;
 
 /**
@@ -66,36 +62,16 @@ public final class AisCoverage {
             webServer = null;
         }
 
-        final DistributerConsumer unfilteredConsumer = (DistributerConsumer) aisBus.getConsumer("UNFILTERED");
-        if (unfilteredConsumer == null) {
-            LOG.error("Could not find distributer with name: UNFILTERED");
-            return;
-        }
-
+        final DistributerConsumer unfilteredConsumer = new DistributerConsumer(true);
+        unfilteredConsumer.init();
         // Delegate unfiltered packets to handler
         unfilteredConsumer.getConsumers().add(new Consumer<AisPacket>() {
             @Override
             public void accept(AisPacket packet) {
                 handler.receiveUnfiltered(packet);
             }
-        });
-
-        if (conf.getFilename() != null) {
-            try {
-                aisReader = AisReaders.createReaderFromInputStream(new FileInputStream(conf.getFilename()));
-                aisReader.registerPacketHandler(new Consumer<AisPacket>() {
-                    @Override
-                    public void accept(AisPacket aisPacket) {
-                        handler.receiveUnfiltered(aisPacket);
-                    }
-                });
-                aisReader.start();
-                LOG.info("File reader started - Not aisbus");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
+        });                
+        aisBus.registerConsumer(unfilteredConsumer);
     }
 
     public void start() {

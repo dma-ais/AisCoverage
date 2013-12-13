@@ -24,8 +24,7 @@ function setupMap(){
 	// Create the map and overwrite cotent of the map element
 	map = new OpenLayers.Map({
         div: "map",
-        projection: "EPSG:900913",
-        fractionalZoom: true
+        projection: "EPSG:900913"
     });
 
 	aisJsonClient = new AisJsonClient();
