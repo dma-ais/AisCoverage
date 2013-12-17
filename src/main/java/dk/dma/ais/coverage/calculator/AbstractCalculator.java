@@ -59,7 +59,7 @@ public abstract class AbstractCalculator implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverageGUI.class);
 
-    public HashMap<String, Station> sourcenames;
+    public HashMap<String, Station> sourcenames = new HashMap<>();
     // protected AisCoverageProject project;
     protected Map<ShipClass, ShipClass> allowedShipClasses = new ConcurrentHashMap<ShipClass, ShipClass>();
     protected Map<ShipType, ShipType> allowedShipTypes = new ConcurrentHashMap<ShipType, ShipType>();
