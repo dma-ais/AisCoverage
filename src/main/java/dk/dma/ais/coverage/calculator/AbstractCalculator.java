@@ -330,7 +330,7 @@ public abstract class AbstractCalculator implements Serializable {
             if (defaultID.equals("sat")) {
                 if (bsmmsi == null) {
                     if (!region.equals("")) {
-                        if (sourcenames.containsKey(region)) {
+                        if (sourcenames != null && sourcenames.containsKey(region)) {
                             name = sourcenames.get(region).getName();
                             Source b = dataHandler.getSource(region);
 
@@ -345,7 +345,7 @@ public abstract class AbstractCalculator implements Serializable {
                         receiverType = ReceiverType.REGION;
                     }
                 } else {
-                    if (sourcenames.containsKey(bsmmsi.toString())) {
+                    if (sourcenames != null && sourcenames.containsKey(bsmmsi.toString())) {
                         name = sourcenames.get(bsmmsi.toString()).getName();
                         Source b = dataHandler.getSource(bsmmsi + "");
 

@@ -13,14 +13,8 @@
 		</transformer>
 		<provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:type="fileReaderProviderConfiguration">
-			<filename>/tmp/ais-data.txt</filename>
+			<filename>/tmp/ais_dk_76h_gbb.txt</filename>
 		</provider>
-
-
-		<consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xsi:type="distributerConsumerConfiguration">
-			<name>UNFILTERED</name>
-		</consumer>
 	</aisbus>
 
 	<!--Sets the grid granularity; the latitude and longitude minimum degree -->
