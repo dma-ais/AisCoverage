@@ -65,12 +65,12 @@ public class Helper {
     }
 
     public static double roundLat(double latitude, int multiplicationFactor) {
-        double multiple = (latSize * multiplicationFactor);
-        return multiple * (Math.floor(latitude / multiple));
+        double multiple = latSize * multiplicationFactor;
+        return multiple * Math.floor(latitude / multiple);
     }
 
     public static double roundLon(double longitude, int multiplicationFactor) {
-        double multiple = (lonSize * multiplicationFactor);
-        return multiple * (Math.floor(longitude / multiple));
+        double multiple = lonSize * multiplicationFactor;
+        return multiple * Math.floor(longitude / multiple);
     }
 }
