@@ -55,7 +55,7 @@ public class Helper {
     }
 
     /**
-     * latitude is rounded down longitude is rounded up. The id is lat-lon-coords representing top-left point in cell
+     * latitude is rounded down longitude is rounded down. The id is lat-lon-coords representing bottom-left point in cell
      */
     public static String getCellId(double latitude, double longitude, int multiplicationFactor) {
         // System.out.println("roundlat="+roundLat(latitude, multiplicationFactor));
@@ -65,26 +65,12 @@ public class Helper {
     }
 
     public static double roundLat(double latitude, int multiplicationFactor) {
-        double lat;
-        if (latitude < 0) {
-            latitude += latSize;
-            lat = (double) ((int) (10000 * (latitude - (latitude % (latSize * multiplicationFactor))))) / 10000;
-
-        } else {
-            lat = (double) ((int) (10000 * (latitude - (latitude % (latSize * multiplicationFactor))))) / 10000;
-        }
-        return lat;
+        double multiple = (latSize * multiplicationFactor);
+        return multiple * (Math.floor(latitude / multiple));
     }
 
     public static double roundLon(double longitude, int multiplicationFactor) {
-        double lon;
-        if (longitude < 0) {
-            lon = (double) ((int) (10000 * (longitude - (longitude % (lonSize * multiplicationFactor))))) / 10000;
-
-        } else {
-            longitude -= lonSize;
-            lon = (double) ((int) (10000 * (longitude - (longitude % (lonSize * multiplicationFactor))))) / 10000;
-        }
-        return lon;
+        double multiple = (lonSize * multiplicationFactor);
+        return multiple * (Math.floor(longitude / multiple));
     }
 }

@@ -155,7 +155,7 @@ public class CoverageHandler {
     int delayedLessThanTen;
 
     public void receiveUnfiltered(AisPacket packet) {
-
+//        System.out.println("sd");
         unfiltCount++;
         // AisMessage message = packet.tryGetAisMessage();
         // if (message == null) { return; }
