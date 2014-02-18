@@ -27,7 +27,7 @@ M2 Eclipse plugin or
 
 ### Distribution ###
 
-A distributable zip file is found [here](http://fuka.dk/ais-coverage-analysis.zip). <br>
+A distributable zip file is found [here](http://fuka.dk/snapshots/AisCoverage-0.2.zip). <br>
 Be aware: As it contains executable files, your browser may post a warning when you download the file. <br><br>
 When you have downloaded the zip file, extract it to your desired location, and open the folder. <br>
 Modify the configuration file (configuration.xml)to suit your needs (For guidance, Look at the 4 configuration samples (also included)). If you will be using several standart configurations you can edit the -file part in the bat file to point at the configuration file you wish you use for the given test<br>
