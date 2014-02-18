@@ -139,18 +139,37 @@ public class OnlyMemoryData implements ICoverageData {
                     // System.out.println(cell.getNOofReceivedSignals(starttime, endtime));
                 }
 
-                // For each cell
-                Collection<Cell> tempCells = tempSource.getGrid().values();
-                for (Cell cell : tempCells) {
+                if (lonStart > lonEnd) {
+                
+                    // For each cell
+                    Collection<Cell> tempCells = tempSource.getGrid().values();
+                    for (Cell cell : tempCells) {
 
-                    if (cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd) {
-                        if (cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd) {
+                        if (cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd) {
+                            if (cell.getLongitude() >= lonStart || cell.getLongitude() <= lonEnd) {
 
-                            // Only add if cell has received message n given timespan
-                            if (cell.getNOofReceivedSignals() > 0) {
-                                cells.add(cell);
+                                // Only add if cell has received message n given timespan
+                                if (cell.getNOofReceivedSignals() > 0) {
+                                    cells.add(cell);
+                                }
                             }
                         }
+
+                    }
+                } else {
+                    // For each cell
+                    Collection<Cell> tempCells = tempSource.getGrid().values();
+                    for (Cell cell : tempCells) {
+                        if (cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd) {
+                            if (cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd) {
+
+                                // Only add if cell has received message n given timespan
+                                if (cell.getNOofReceivedSignals() > 0) {
+                                    cells.add(cell);
+                                }
+                            }
+                        }
+
                     }
                 }
             }
