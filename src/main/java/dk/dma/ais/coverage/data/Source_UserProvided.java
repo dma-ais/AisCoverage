@@ -21,6 +21,9 @@ public class Source_UserProvided {
     private double latitude;
     private double longitude;
 
+    public Source_UserProvided(){
+        
+    }
     public Source_UserProvided(String name, double lat, double lon) {
         this.name = name;
         latitude = lat;
