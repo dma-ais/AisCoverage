@@ -132,9 +132,6 @@ public class CoverageRestService {
         double lonStart = Double.parseDouble(areaArray[1]);
         double latEnd = Double.parseDouble(areaArray[2]);
         double lonEnd = Double.parseDouble(areaArray[3]);
-        System.out.println(lonStart);
-        System.out.println(lonEnd);
-        System.out.println();
 
         Map<String, Boolean> sourcesMap = new HashMap<String, Boolean>();
         if (sources != null) {
