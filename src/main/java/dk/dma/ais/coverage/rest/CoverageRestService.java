@@ -43,20 +43,20 @@ import org.slf4j.LoggerFactory;
 //import dk.dma.ais.coverage.export.CSVGenerator;
 import dk.dma.ais.coverage.AisCoverage;
 import dk.dma.ais.coverage.CoverageHandler;
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.ICoverageData;
 import dk.dma.ais.coverage.data.OnlyMemoryData;
 import dk.dma.ais.coverage.data.Source;
 import dk.dma.ais.coverage.data.TimeSpan;
-import dk.dma.ais.coverage.data.json.ExportShipTimeSpan;
-import dk.dma.ais.coverage.data.json.JSonCoverageMap;
-import dk.dma.ais.coverage.data.json.JsonConverter;
-import dk.dma.ais.coverage.data.json.JsonSource;
-import dk.dma.ais.coverage.data.json.Status;
-import dk.dma.ais.coverage.export.ChartGenerator;
-import dk.dma.ais.coverage.export.KMLGenerator;
-import dk.dma.ais.coverage.export.XMLGenerator;
+import dk.dma.ais.coverage.export.data.ExportShipTimeSpan;
+import dk.dma.ais.coverage.export.data.JSonCoverageMap;
+import dk.dma.ais.coverage.export.data.JsonConverter;
+import dk.dma.ais.coverage.export.data.JsonSource;
+import dk.dma.ais.coverage.export.data.Status;
+import dk.dma.ais.coverage.export.generators.ChartGenerator;
+import dk.dma.ais.coverage.export.generators.KMLGenerator;
+import dk.dma.ais.coverage.export.generators.XMLGenerator;
 
 /**
  * JAX-RS rest services
@@ -140,7 +140,7 @@ public class CoverageRestService {
                 sourcesMap.put(string, true);
             }
         }
-        JSonCoverageMap result = handler.getJsonCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor,
+        JSonCoverageMap result = handler.getTerrestrialCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor,
                 new Date(starttime), new Date(endtime));
         Date end = new Date();
         LOG.info("Coverage request completed in: " + ((double) (end.getTime() - start.getTime()) / 1000) + " seconds");

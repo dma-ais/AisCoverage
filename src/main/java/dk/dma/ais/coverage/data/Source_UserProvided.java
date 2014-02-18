@@ -15,17 +15,13 @@
  */
 package dk.dma.ais.coverage.data;
 
-public class Station {
+public class Source_UserProvided {
 
     private String name = "";
     private double latitude;
     private double longitude;
 
-    public Station() {
-
-    }
-
-    public Station(String name, double lat, double lon) {
+    public Source_UserProvided(String name, double lat, double lon) {
         this.name = name;
         latitude = lat;
         longitude = lon;

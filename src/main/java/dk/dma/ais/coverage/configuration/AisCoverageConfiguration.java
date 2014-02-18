@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import dk.dma.ais.configuration.bus.AisBusConfiguration;
-import dk.dma.ais.coverage.data.Station;
+import dk.dma.ais.coverage.data.Source_UserProvided;
 import dk.dma.ais.coverage.web.WebServerConfiguration;
 
 /**
@@ -43,13 +43,13 @@ public class AisCoverageConfiguration {
     private double latSize = 0.0225225225;
     private double lonSize = 0.0386812541;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
-    private HashMap<String, Station> sourcenames = new HashMap<String, Station>();
+    private HashMap<String, Source_UserProvided> sourcenames = new HashMap<String, Source_UserProvided>();
 
-    public HashMap<String, Station> getSourceNameMap() {
+    public HashMap<String, Source_UserProvided> getSourceNameMap() {
         return sourcenames;
     }
 
-    public void setSourceNameMap(HashMap<String, Station> map) {
+    public void setSourceNameMap(HashMap<String, Source_UserProvided> map) {
         sourcenames = map;
     }
 

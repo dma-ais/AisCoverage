@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 
 /**
  * There should be only one instance of this per ship Used to store signals from the ship and be able to see periods where the ship

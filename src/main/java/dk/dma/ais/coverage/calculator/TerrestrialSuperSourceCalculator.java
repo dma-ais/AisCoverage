@@ -27,7 +27,7 @@ import dk.dma.ais.coverage.data.Ship;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 import dk.dma.ais.coverage.data.Source;
 import dk.dma.ais.coverage.data.Source.ReceiverType;
-import dk.dma.ais.coverage.data.Station;
+import dk.dma.ais.coverage.data.Source_UserProvided;
 import dk.dma.ais.coverage.event.AisEvent;
 import dk.dma.ais.coverage.event.AisEvent.Event;
 import dk.dma.ais.coverage.event.IAisEventListener;
@@ -44,7 +44,7 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
  * Rotation is determined based on difference between course over ground (cog) from first and last message in buffer. If rotation is
  * ignored, missing points will only be calculated for ships that are NOT rotating.
  */
-public class SupersourceCoverageCalculator extends AbstractCalculator {
+public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
 
     private static final long serialVersionUID = 1L;
     private int bufferInSeconds = 20;
@@ -71,8 +71,7 @@ public class SupersourceCoverageCalculator extends AbstractCalculator {
         }
     }
 
-    public SupersourceCoverageCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
-        super(map);
+    public TerrestrialSuperSourceCalculator(boolean ignoreRotation) {
         this.ignoreRotation = ignoreRotation;
     }
 

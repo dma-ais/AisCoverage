@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 
 public class OnlyMemoryData implements ICoverageData {
 
-    protected SourceHandler gridHandler = new SourceHandler(null);
+    protected SourceHandler gridHandler = new SourceHandler();
 
     @Override
     public Ship getShip(String sourceMmsi, long shipMmsi) {
@@ -85,17 +85,6 @@ public class OnlyMemoryData implements ICoverageData {
     @Override
     public Source createSource(String sourceId) {
         return gridHandler.createGrid(sourceId);
-    }
-
-    @Override
-    public void setLatSize(double latsize) {
-        Helper.latSize = latsize;
-
-    }
-
-    @Override
-    public void setLonSize(double lonsize) {
-        Helper.lonSize = lonsize;
     }
 
     @Override

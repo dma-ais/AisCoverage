@@ -13,11 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.coverage.data.json;
+package dk.dma.ais.coverage.export.data;
 
-public class JsonTimeSpan {
+public class JsonSource {
 
-    // from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
-    public long fromTime, toTime;
-    public int spanLength, timeSinceLastSpan, accumulatedTime, signals, distinctShips;
+    public String mmsi;
+    public String name;
+    public double lat;
+    public double lon;
+    public String type;
+
 }

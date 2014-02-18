@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.coverage.export;
+package dk.dma.ais.coverage.export.generators;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -36,9 +36,9 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.TimeSpan;
-import dk.dma.ais.coverage.data.json.ExportShipTimeSpan;
+import dk.dma.ais.coverage.export.data.ExportShipTimeSpan;
 
 public class ChartGenerator {
     private BufferedImage bi;

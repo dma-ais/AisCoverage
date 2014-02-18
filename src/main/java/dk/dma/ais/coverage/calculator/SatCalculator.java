@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.CustomMessage;
 import dk.dma.ais.coverage.data.QueryParams;
@@ -39,7 +39,7 @@ import dk.dma.ais.coverage.data.Source.ReceiverType;
 import dk.dma.ais.coverage.data.SuperShip;
 import dk.dma.ais.coverage.data.SuperShip.Hour;
 import dk.dma.ais.coverage.data.TimeSpan;
-import dk.dma.ais.coverage.data.json.ExportShipTimeSpan;
+import dk.dma.ais.coverage.export.data.ExportShipTimeSpan;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 
 public class SatCalculator extends AbstractCalculator {
@@ -70,20 +70,6 @@ public class SatCalculator extends AbstractCalculator {
         }
     };
 
-    // Cell id is mapped to a list of timespans
-    // private Map<String, FixedSpanCell> fixedSpans = new ConcurrentHashMap<String, FixedSpanCell>();
-
-    // Ten minutes priority queue
-    // PriorityQueue<CustomMessage> tenMinQueue = new PriorityQueue<CustomMessage>(1000,new CustomMessageDateComparator());
-
-    // 6 hours priority queue
-    // PriorityQueue<CustomMessage> sixHourQueue = new PriorityQueue<CustomMessage>(1000,new CustomMessageDateComparator());
-
-    // public static void main(String[] args){
-    // SatCalculator s = new SatCalculator();
-    // s.getFixedTimeSpans(new Date(), new Date(new Date().getTime()+1000*60*60), 1, 1, 1, 1,1);
-    // }
-
     /**
      * Retrieves a list of time spans based on a rectangle defined by two lat-lon points. Cells within the rectangle each contain a
      * number of time spans. Spans over the same time are merged.
@@ -102,27 +88,16 @@ public class SatCalculator extends AbstractCalculator {
             t.setLastMessage(new Date(floorDate.getTime() + (1000 * 60 * 60 * (i + 1))));
             result.add(t);
             timespanMap.put(t.getFirstMessage().getTime(), t);
-            // System.out.println("inserted" + t.getFirstMessage().getTime());
         }
 
         Collection<Cell> cells = dataHandler.getSource("supersource").getGrid().values();
 
         for (Cell fixedSpanCell : cells) {
-            // System.out.println(latMax);
-            // System.out.println(latMin);
-            // System.out.println(lonMax);
-            // System.out.println(lonMin);
-            // System.out.println(fixedSpanCell.lat);
-            // System.out.println(fixedSpanCell.lon);
-            // System.out.println();
             if (fixedSpanCell.getLatitude() <= latMax && fixedSpanCell.getLatitude() >= latMin
                     && fixedSpanCell.getLongitude() >= lonMin && fixedSpanCell.getLongitude() <= lonMax) {
 
                 Collection<TimeSpan> spans = fixedSpanCell.getFixedWidthSpans().values();
                 for (TimeSpan timeSpan : spans) {
-                    // System.out.println("sdf");
-                    // System.out.println(timeSpan.getFirstMessage().getTime());
-                    // System.out.println(startTime);
                     if (timeSpan.getLastMessage().getTime() <= endTime.getTime()
                             && timeSpan.getFirstMessage().getTime() >= startTime.getTime()) {
                         TimeSpan resultSpan = timespanMap.get(timeSpan.getFirstMessage().getTime());
@@ -137,7 +112,6 @@ public class SatCalculator extends AbstractCalculator {
     }
 
     public List<ExportShipTimeSpan> getShipDynamicTimeSpans(Date startTime, Date endTime, int shipMmsi) {
-        System.out.println("shipmmsi: " + shipMmsi);
         SuperShip ss = superships.get(shipMmsi);
         if (ss == null) {
             return null;
@@ -146,8 +120,6 @@ public class SatCalculator extends AbstractCalculator {
         List<ExportShipTimeSpan> result = new ArrayList<ExportShipTimeSpan>();
         short startHour = (short) ((startTime.getTime() - Helper.analysisStarted.getTime()) / 1000 / 60 / 60);
         short endHour = (short) ((endTime.getTime() - Helper.analysisStarted.getTime()) / 1000 / 60 / 60);
-        System.out.println(startHour);
-        System.out.println(endHour);
         int previousMinute = -1;
         int currentMinute = -1;
         for (short i = startHour; i < endHour; i++) {
@@ -183,7 +155,6 @@ public class SatCalculator extends AbstractCalculator {
                 }
             }
         }
-        System.out.println("Size of result: " + result.size());
         return result;
 
     }
@@ -288,37 +259,7 @@ public class SatCalculator extends AbstractCalculator {
         return dataHandler.getCells(params);
     }
 
-    // private boolean matchTerrestrialMessage(CustomMessage m) {
-    // // Find cell
-    // Cell c = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
-    // if (c == null)
-    // return false;
-    //
-    // List<TimeSpan> timespans = c.getTimeSpans();
-    // for (int i = timespans.size() - 1; i >= 0; i--) {
-    // TimeSpan t = c.getTimeSpans().get(i);
-    // // If message is newer than t, then it will be newer than every other timespan
-    // // So just return false
-    // if (t.getLastMessage().getTime() < m.getTimestamp().getTime())
-    // return false;
-    //
-    // // If m is older than last message but newer than first messsage, then m belongs to the timespan
-    // if (t.getFirstMessage().getTime() <= m.getTimestamp().getTime()) {
-    // t.getDistinctShipsTerrestrial().put(m.getShipMMSI() + "", true);
-    // t.incrementMessageCounterTerrestrialUnfiltered();
-    //
-    // return true;
-    // }
-    // }
-    //
-    // return false;
-    // }
-
     private void calcFixedTimeSpan(CustomMessage m) {
-        // double lonRound = Helper.roundLon(m.getLongitude(), 1);
-        // double latRound = Helper.roundLat(m.getLatitude(), 1);
-        // String cellId = Helper.getCellId(m.getLatitude(), m.getLongitude(), 1);
-
         // get the right cell, or create it if it doesn't exist.
         Cell cell = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
         if (cell == null) {

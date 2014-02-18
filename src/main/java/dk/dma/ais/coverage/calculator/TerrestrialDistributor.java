@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.coverage.AisCoverage;
 import dk.dma.ais.coverage.data.CustomMessage;
 import dk.dma.ais.coverage.data.Source;
-import dk.dma.ais.coverage.data.Station;
 import dk.dma.ais.coverage.event.AisEvent;
 import dk.dma.ais.coverage.event.AisEvent.Event;
 import dk.dma.ais.coverage.event.IAisEventListener;
@@ -34,7 +33,7 @@ import dk.dma.ais.coverage.event.IAisEventListener;
  * This calculator requires an unfiltered ais stream (no doublet filtering). It increments "received cell-message counter" for
  * corresponding sources, based on the messages that the supersource approves.
  */
-public class DistributeOnlyCalculator extends AbstractCalculator implements IAisEventListener {
+public class TerrestrialDistributor extends AbstractCalculator implements IAisEventListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(AisCoverage.class);
     private static final long serialVersionUID = -528305318453243556L;
@@ -52,27 +51,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
         }
     };
 
-    public DistributeOnlyCalculator(boolean ignoreRotation, HashMap<String, Station> map) {
-        super(map);
-        Thread t1 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    // Date now = new Date();
-                    // int elapsed = (int) ((now.getTime() - start.getTime()) / 1000);
-                    // LOG.debug("messages/sec: "+ messagesProcessed/elapsed+ "... received messages "+receivedMessages.size());
-                }
-            }
-        });
-        t1.start();
-    }
-
     /*
      * Takes supersource message as input. Finds matching messages for each source and increments corresponding cells.
      */
@@ -83,18 +61,10 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
             for (CustomMessage customMessage : approvedMessages.values()) {
                 // increment cell in each source
                 Source source = dataHandler.getSource(customMessage.getSourceMMSI());
-
-                // Cell cell = dataHandler.getCell(source.getIdentifier(), customMessage.getLatitude(),
-                // customMessage.getLongitude());
-                // if (cell == null) {
-                // cell = dataHandler.createCell(source.getIdentifier(), customMessage.getLatitude(), customMessage.getLongitude());
-                // }
-
                 dataHandler.getSource(source.getIdentifier()).incrementMessageCount();
                 dataHandler.incrementReceivedSignals(source.getIdentifier(), customMessage.getLatitude(),
                         customMessage.getLongitude(), aprrovedMessage.getTimestamp());
-                // cell.incrementNOofReceivedSignals();
-                // dataHandler.updateCell(cell);
+
             }
 
             // Done processing - remove messages
@@ -127,31 +97,6 @@ public class DistributeOnlyCalculator extends AbstractCalculator implements IAis
         }
 
     }
-
-    /*
-     * For testing purposes
-     */
-    // private void printMessage(CustomMessage m) {
-    // AisMessage aisM = m.getOriginalMessage();
-    // try {
-    // System.out.println(aisM.getEncoded().encode());
-    // } catch (SixbitException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // System.out.println(m.getOriginalMessage());
-    // System.out.println(m.getOriginalMessage().getClass());
-    // System.out.println(m.getCog());
-    // System.out.println(m.getLatitude());
-    // System.out.println(m.getLongitude());
-    // System.out.println(m.getShipMMSI());
-    // System.out.println(m.getSog());
-    // System.out.println(m.getTimestamp().getTime());
-    // System.out.println(aisM.getSourceTag().getBaseMmsi());
-    // System.out.println(messageToKey(m));
-    //
-    // System.out.println();
-    // }
 
     @Override
     public void calculate(CustomMessage m) {

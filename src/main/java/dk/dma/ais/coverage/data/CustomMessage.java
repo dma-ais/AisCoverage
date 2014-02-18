@@ -21,6 +21,9 @@ import java.util.Date;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 
+/**
+ * Used for storing information relevant for the calculators
+ */
 public class CustomMessage implements Serializable {
     private AisMessage originalMessage;
 

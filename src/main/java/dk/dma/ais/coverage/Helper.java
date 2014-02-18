@@ -13,10 +13,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.coverage.calculator.geotools;
+package dk.dma.ais.coverage;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
+
+import dk.dma.ais.coverage.calculator.geotools.SphereProjection;
+import dk.dma.ais.coverage.data.Source_UserProvided;
 
 public class Helper {
 
@@ -24,6 +28,8 @@ public class Helper {
     public static double lonSize = 0.03868125413876516;
     public static Date analysisStarted;
     public static Date latestMessage;
+    public static int debugVerbosityLevel;
+    public static Map<String, Source_UserProvided> sourceInfo;
     private static SphereProjection projection = new SphereProjection();
 
     public static SphereProjection getProjection() {
@@ -58,9 +64,7 @@ public class Helper {
      * latitude is rounded down longitude is rounded down. The id is lat-lon-coords representing bottom-left point in cell
      */
     public static String getCellId(double latitude, double longitude, int multiplicationFactor) {
-        // System.out.println("roundlat="+roundLat(latitude, multiplicationFactor));
-        // System.out.println("roundLon="+roundLon(latitude, multiplicationFactor));
-        // System.out.println();
+        //TODO make a more space efficient ID. Instead of using a concatenated string.
         return roundLat(latitude, multiplicationFactor) + "_" + roundLon(longitude, multiplicationFactor);
     }
 
@@ -72,5 +76,10 @@ public class Helper {
     public static double roundLon(double longitude, int multiplicationFactor) {
         double multiple = lonSize * multiplicationFactor;
         return multiple * Math.floor(longitude / multiple);
+    }
+    
+    public static void setLatLonSize(int meters, double latitude){
+        latSize = SphereProjection.metersToLatDegree(meters);
+        lonSize = SphereProjection.metersToLonDegree(latitude, meters);
     }
 }

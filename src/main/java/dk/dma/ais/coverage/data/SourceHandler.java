@@ -20,22 +20,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import dk.dma.ais.coverage.calculator.AbstractCalculator;
-
 public class SourceHandler implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
 
-    // private AbstractCalculator calculator;
-
-    public SourceHandler(AbstractCalculator calculator) {
-        // this.calculator = calculator;
-    }
-
-    public SourceHandler() {
-
-    }
 
     /*
      * Create grid associated to a specific transponder
@@ -77,16 +66,4 @@ public class SourceHandler implements Serializable {
     public Map<String, Source> getBaseStations() {
         return baseStations;
     }
-    // public double getLatSize() {
-    // return latSize;
-    // }
-    // public void setLatSize(double latSize) {
-    // this.latSize = latSize;
-    // }
-    // public double getLonSize() {
-    // return lonSize;
-    // }
-    // public void setLonSize(double lonSize) {
-    // this.lonSize = lonSize;
-    // }
 }

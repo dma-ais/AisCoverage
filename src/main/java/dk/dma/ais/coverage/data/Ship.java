@@ -25,19 +25,11 @@ public class Ship implements Serializable {
     private long mmsi;
     private CustomMessage lastMessage;
     private List<CustomMessage> messageBuffer = new ArrayList<CustomMessage>();
-    // private Cell lastCell = null;
     private ShipClass shipClass;
 
     public enum ShipClass {
         CLASS_A, CLASS_B
     }
-
-    // public Cell getLastCell() {
-    // return lastCell;
-    // }
-    // public void setLastCell(Cell lastCell) {
-    // this.lastCell = lastCell;
-    // }
     public Ship(Long mmsi, ShipClass shipClass) {
         this.mmsi = mmsi;
         this.shipClass = shipClass;

@@ -23,16 +23,10 @@ import java.util.Map;
 
 public class Cell {
 
-    // private static final long serialVersionUID = 1L;
-    // private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
-
     private int NOofReceivedSignals;
     private int NOofMissingSignals;
     private double latitude;
     private double longitude;
-    // private String id;
-    // private Source grid;
-    // private int shipCount = 0;
     private List<TimeSpan> timeSpans;
     private Map<Long, TimeSpan> fixedWidthSpans = new HashMap<Long, TimeSpan>();
 
@@ -55,14 +49,11 @@ public class Cell {
     public Cell(Source grid, double lat, double lon, String id) {
         this.latitude = lat;
         this.longitude = lon;
-        // this.grid = grid;
-        // this.id = id;
     }
 
     public Cell(double lat, double lon, String id) {
         this.latitude = lat;
         this.longitude = lon;
-        // this.id = id;
     }
 
     public void incrementNOofReceivedSignals() {
@@ -73,10 +64,6 @@ public class Cell {
         NOofMissingSignals++;
     }
 
-    // public void incrementShipCount(){
-    // shipCount++;
-    // }
-
     public long getTotalNumberOfMessages() {
         return NOofReceivedSignals + NOofMissingSignals;
     }
@@ -85,9 +72,6 @@ public class Cell {
         return (double) NOofReceivedSignals / (double) getTotalNumberOfMessages();
     }
 
-    // public Map<Long, Ship> getShips() {
-    // return ships;
-    // }
     public double getLatitude() {
         return latitude;
     }
@@ -108,18 +92,6 @@ public class Cell {
         return this.latitude + "_" + this.longitude;
     }
 
-    // public void setId(String id) {
-    // this.id = id;
-    // }
-    // public Source getGrid() {
-    // return grid;
-    // }
-    // public void setGrid(Source grid) {
-    // this.grid = grid;
-    // }
-    // public int getShipCount() {
-    // return shipCount;
-    // }
     public int getNOofReceivedSignals(Date starttime, Date endTime) {
         int result = 0;
         Collection<TimeSpan> spans = fixedWidthSpans.values();

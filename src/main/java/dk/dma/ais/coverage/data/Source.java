@@ -16,20 +16,19 @@
 package dk.dma.ais.coverage.data;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import dk.dma.ais.coverage.calculator.geotools.Helper;
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 
 public class Source implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private ConcurrentHashMap<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
-    private ConcurrentHashMap<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
+    private Map<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
+    private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
     private String name = "";
     private String identifier;
-    // private double latSize;
-    // private double lonSize;
     private double latitude;
     private double longitude;
     private long messageCount;
@@ -51,8 +50,6 @@ public class Source implements Serializable {
 
     public Source(String identifier) {
         this.identifier = identifier;
-        // this.latSize = latSize;
-        // this.lonSize = lonSize;
     }
 
     public Source() {
@@ -107,9 +104,6 @@ public class Source implements Serializable {
         return cell;
     }
 
-    /*
-     * Create ship
-     */
     public Ship createShip(Long mmsi, ShipClass shipClass) {
         Ship ship = new Ship(mmsi, shipClass);
         ships.put(mmsi, ship);
@@ -120,7 +114,7 @@ public class Source implements Serializable {
         return ships.get(mmsi);
     }
 
-    public ConcurrentHashMap<String, Cell> getGrid() {
+    public Map<String, Cell> getGrid() {
         return grid;
     }
 
@@ -128,7 +122,7 @@ public class Source implements Serializable {
         this.grid = grid;
     }
 
-    public ConcurrentHashMap<Long, Ship> getShips() {
+    public Map<Long, Ship> getShips() {
         return ships;
     }
 
@@ -151,19 +145,6 @@ public class Source implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
-    // public double getLatSize() {
-    // return latSize;
-    // }
-    // public void setLatSize(double latSize) {
-    // this.latSize = latSize;
-    // }
-    // public double getLonSize() {
-    // return lonSize;
-    // }
-    // public void setLonSize(double lonSize) {
-    // this.lonSize = lonSize;
-    // }
     public Double getLatitude() {
         return latitude;
     }

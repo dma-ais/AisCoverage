@@ -13,14 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
-package dk.dma.ais.coverage.data.json;
+package dk.dma.ais.coverage.export.data;
 
-import java.io.Serializable;
-import java.util.Map;
+public class JsonTimeSpan {
 
-public class JSonCoverageMap implements Serializable {
-    private static final long serialVersionUID = 1L;
-    public double latSize;
-    public double lonSize;
-    public Map<String, ExportCell> cells;
+    // from time, to time, data time, time since last timespan, accumulated time, signals, distinct ships
+    public long fromTime, toTime;
+    public int spanLength, timeSinceLastSpan, accumulatedTime, signals, distinctShips;
 }
