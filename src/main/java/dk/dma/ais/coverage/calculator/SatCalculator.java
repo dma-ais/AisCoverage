@@ -106,7 +106,7 @@ public class SatCalculator extends AbstractCalculator {
                 }
             }
         }
-        System.out.println(timeDifference);
+//        System.out.println(timeDifference);
 
         return result;
     }

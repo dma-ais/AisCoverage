@@ -121,8 +121,8 @@ public class CoverageRestService {
         String area = request.getParameter("area");
         long starttime = Long.parseLong(request.getParameter("starttime"));
         long endtime = Long.parseLong(request.getParameter("endtime"));
-        System.out.println(starttime);
-        System.out.println(endtime);
+//        System.out.println(starttime);
+//        System.out.println(endtime);
 
         String[] areaArray = area.split(",");
 
@@ -156,8 +156,8 @@ public class CoverageRestService {
         int multiplicity = Integer.parseInt(exportMultiFactor);
         long starttime = Long.parseLong(startTime);
         long endtime = Long.parseLong(endTime);
-        System.out.println(starttime);
-        System.out.println(endtime);
+//        System.out.println(starttime);
+//        System.out.println(endtime);
 
         //
         // // BaseStationHandler gh = new BaseStationHandler();
@@ -352,10 +352,10 @@ public class CoverageRestService {
         // response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
         ServletOutputStream out = response.getOutputStream();
 
-        System.out.println(latMax);
-        System.out.println(lonMin);
-        System.out.println(latMin);
-        System.out.println(lonMax);
+//        System.out.println(latMax);
+//        System.out.println(lonMin);
+//        System.out.println(latMin);
+//        System.out.println(lonMax);
 
         ChartGenerator cg = new ChartGenerator();
         if (satChartMethod.equals("satonly")) {

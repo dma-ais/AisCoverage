@@ -260,7 +260,7 @@ public class ChartGenerator {
                 + 45);
 
         // coverageRatio = ((double) (Math.round((double) minutesCovered / exactTimeDifference * 10000)) / 100);
-        System.out.println((double) (Math.round((double) minutesCovered / exactTimeDifference * 10000)) / 100);
+//        System.out.println((double) (Math.round((double) minutesCovered / exactTimeDifference * 10000)) / 100);
 
         drawHeader("Satellite-Terrestrial: Fixed Periods");
         drawDescription("Time span: ", dt.format(floorDate) + " - " + dt.format(ceilDate));
@@ -776,8 +776,8 @@ public class ChartGenerator {
         int betweenBarWidth = (int) ((d2 - d1) / 1000 / 60);
         int x = (int) (Math.floor((d2 - floorDate.getTime()) / 1000 / 60) + offset);
         if (betweenBarWidth > 0) {
-            System.out.println("between bar " + betweenBarWidth);
-            System.out.println();
+//            System.out.println("between bar " + betweenBarWidth);
+//            System.out.println();
             int stringLen = (int) getTextWidth(betweenBarWidth + " min");
             ig2.drawString(betweenBarWidth + " min", height - bottomOffset - 1 - stringLen + 50,
                     (x - (betweenBarWidth / 2) - 4 + z) * -1);
