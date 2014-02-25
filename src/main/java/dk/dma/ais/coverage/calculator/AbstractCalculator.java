@@ -16,36 +16,21 @@
 package dk.dma.ais.coverage.calculator;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import dk.dma.ais.coverage.AisCoverageGUI;
-import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.calculator.geotools.SphereProjection;
 import dk.dma.ais.coverage.data.CustomMessage;
 import dk.dma.ais.coverage.data.ICoverageData;
 import dk.dma.ais.coverage.data.OnlyMemoryData;
 import dk.dma.ais.coverage.data.Ship;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
-import dk.dma.ais.coverage.data.Source;
-import dk.dma.ais.coverage.data.Source.ReceiverType;
-import dk.dma.ais.coverage.event.AisEvent;
-import dk.dma.ais.coverage.event.EventBroadcaster;
 import dk.dma.ais.message.AisMessage;
-import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisMessage5;
-import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.message.ShipTypeCargo;
 import dk.dma.ais.message.ShipTypeCargo.ShipType;
-import dk.dma.ais.packet.AisPacket;
-import dk.dma.ais.packet.AisPacketTags.SourceType;
-import dk.dma.ais.proprietary.IProprietarySourceTag;
-import dk.dma.enav.model.geometry.Position;
 
 /**
  * See CoverageCalculator and DensityPlotCalculator for examples of how to extend this class. When a calculator is added to an
@@ -246,5 +231,7 @@ public abstract class AbstractCalculator implements Serializable {
     public CustomMessage getCurrentMessage() {
         return currentMessage;
     }
+    
+   
 
 }

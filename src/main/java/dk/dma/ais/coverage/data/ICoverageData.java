@@ -20,9 +20,11 @@ import java.util.Date;
 import java.util.List;
 
 import dk.dma.ais.coverage.data.Ship.ShipClass;
+import dk.dma.ais.packet.AisPacket;
 
 public interface ICoverageData {
 
+    CustomMessage packetToCustomMessage(AisPacket packet);
     Ship createShip(int shipMmsi, ShipClass shipClass);
     Ship getShip(int shipMmsi);
     Collection<Ship> getShips();

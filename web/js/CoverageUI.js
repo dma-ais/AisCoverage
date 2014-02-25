@@ -589,7 +589,7 @@ function CoverageUI () {
     	            strokeColor: "black",
     	            strokeWidth: 2,
     	            graphicZIndex: 1,
-    	            cursor: "crosshair"
+    	            cursor: "pointer"
     		}
     	}else{
     		feature.style = {
@@ -598,7 +598,7 @@ function CoverageUI () {
     	            strokeColor: "black",
     	            strokeWidth: 2,
     	            graphicZIndex: 1,
-    	            cursor: "crosshair"
+    	            cursor: "pointer"
     		}
     	}
     	if(self.selectedSource == val){

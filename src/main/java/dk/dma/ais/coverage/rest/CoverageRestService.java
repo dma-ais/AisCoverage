@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import dk.dma.ais.coverage.AisCoverage;
 import dk.dma.ais.coverage.CoverageHandler;
 import dk.dma.ais.coverage.Helper;
+import dk.dma.ais.coverage.calculator.TerrestrialCalculator;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.ICoverageData;
 import dk.dma.ais.coverage.data.OnlyMemoryData;
@@ -143,7 +144,8 @@ public class CoverageRestService {
                 sourcesMap.add(string);
             }
         }
-        JSonCoverageMap result = handler.getTerrestrialCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor,
+        TerrestrialCalculator terCalc = (TerrestrialCalculator) handler.getCalculators().get(0);
+        JSonCoverageMap result = terCalc.getTerrestrialCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor,
                 new Date(starttime), new Date(endtime));
         Date end = new Date();
         LOG.info("Coverage request completed in: " + ((double) (end.getTime() - start.getTime()) / 1000) + " seconds");

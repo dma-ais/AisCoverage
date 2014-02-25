@@ -18,12 +18,18 @@ package dk.dma.ais.coverage.calculator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import dk.dma.ais.coverage.AisCoverage;
 import dk.dma.ais.coverage.Helper;
+import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
+import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.CustomMessage;
+import dk.dma.ais.coverage.data.QueryParams;
 import dk.dma.ais.coverage.data.Ship;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 import dk.dma.ais.coverage.data.Source;
@@ -32,6 +38,9 @@ import dk.dma.ais.coverage.data.Source_UserProvided;
 import dk.dma.ais.coverage.event.AisEvent;
 import dk.dma.ais.coverage.event.AisEvent.Event;
 import dk.dma.ais.coverage.event.IAisEventListener;
+import dk.dma.ais.coverage.export.data.ExportCell;
+import dk.dma.ais.coverage.export.data.JSonCoverageMap;
+import dk.dma.ais.coverage.export.data.JsonConverter;
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisPositionMessage;
@@ -229,6 +238,62 @@ public class TerrestrialCalculator extends AbstractCalculator {
             difference -= 360.0;
         }
         return difference;
+    }
+    
+    //TODO consider moving this method to a calculator
+    public JSonCoverageMap getTerrestrialCoverage(double latStart, double lonStart, double latEnd, double lonEnd,
+            Set<String> sources, int multiplicationFactor, Date starttime, Date endtime) {
+
+        AisCoverageConfiguration conf = AisCoverage.get().getConf();
+        JSonCoverageMap map = new JSonCoverageMap();
+        map.latSize = conf.getLatSize() * multiplicationFactor;
+        map.lonSize = conf.getLonSize() * multiplicationFactor;
+
+        HashMap<String, ExportCell> JsonCells = new HashMap<String, ExportCell>();
+
+        QueryParams params = new QueryParams();
+        params.latStart = latStart;
+        params.latEnd = latEnd;
+        params.lonStart = lonStart;
+        params.lonEnd = lonEnd;
+        params.sources = sources;
+        params.multiplicationFactor = multiplicationFactor;
+        params.startDate = starttime;
+        params.endDate = endtime;
+
+        List<Cell> celllist = dataHandler.getCells(params);
+        Set<String> superSourceIsHere = new HashSet<String>();
+        superSourceIsHere.add(AbstractCalculator.SUPERSOURCE_MMSI);
+        params.sources = superSourceIsHere;
+        List<Cell> celllistSuper = dataHandler.getCells(params);
+        Map<String, Cell> superMap = new HashMap<String, Cell>();
+        for (Cell cell : celllistSuper) {
+            if (cell.getNOofReceivedSignals() > 0) {
+                superMap.put(cell.getId(), cell);
+            }
+        }
+
+        if (!celllist.isEmpty()) {
+            map.latSize = conf.getLatSize() * multiplicationFactor;
+        }
+
+        for (Cell cell : celllist) {
+            Cell superCell = superMap.get(cell.getId());
+            if (superCell == null) {
+
+            } else {
+                    ExportCell existing = JsonCells.get(cell.getId());
+                    ExportCell theCell = JsonConverter.toJsonCell(cell, superCell, starttime, endtime);
+                    if (existing == null || theCell.getCoverage() > existing.getCoverage()) {
+                        JsonCells.put(cell.getId(), theCell);
+                    }
+                
+            }
+        }
+
+        map.cells = JsonCells;
+
+        return map;
     }
 
     // Getters and setters
