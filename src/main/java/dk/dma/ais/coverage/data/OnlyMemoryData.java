@@ -29,8 +29,12 @@ import dk.dma.ais.coverage.data.Ship.ShipClass;
 
 public class OnlyMemoryData implements ICoverageData {
 
-    protected SourceHandler gridHandler = new SourceHandler();
     private Map<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
+    private ConcurrentHashMap<String, Source> sources = new ConcurrentHashMap<String, Source>();
+    
+    public OnlyMemoryData(){
+        createSource(AbstractCalculator.SUPERSOURCE_MMSI);
+    }
 
     @Override
     public Ship getShip(int shipMmsi) {
@@ -44,7 +48,7 @@ public class OnlyMemoryData implements ICoverageData {
 
     @Override
     public Cell getCell(String sourceMmsi, double lat, double lon) {
-        return gridHandler.getSource(sourceMmsi).getCell(lat, lon);
+        return sources.get(sourceMmsi).getCell(lat, lon);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class OnlyMemoryData implements ICoverageData {
 
     private List<Cell> getCells() {
         List<Cell> cells = new ArrayList<Cell>();
-        Collection<Source> basestations = gridHandler.getSources().values();
+        Collection<Source> basestations = sources.values();
         for (Source basestation : basestations) {
             if (basestation.isVisible()) {
 
@@ -84,22 +88,24 @@ public class OnlyMemoryData implements ICoverageData {
 
     @Override
     public Cell createCell(String sourceMmsi, double lat, double lon) {
-        return gridHandler.getSource(sourceMmsi).createCell(lat, lon);
+        return sources.get(sourceMmsi).createCell(lat, lon);
     }
 
     @Override
     public Source getSource(String sourceId) {
-        return gridHandler.getSources().get(sourceId);
+        return sources.get(sourceId);
     }
 
     @Override
     public Source createSource(String sourceId) {
-        return gridHandler.createGrid(sourceId);
+        Source s = new Source(sourceId);
+        sources.put(sourceId, s);
+        return s;
     }
 
     @Override
     public Collection<Source> getSources() {
-        return gridHandler.getSources().values();
+        return sources.values();
     }
 
     private List<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd, Set<String> sources,
@@ -111,7 +117,7 @@ public class OnlyMemoryData implements ICoverageData {
         for (String sourcename : sources) {
             
             //Make new cells that matches the multiplication factor
-            Source source = gridHandler.getSources().get(sourcename);
+            Source source = this.sources.get(sourcename);
             if(source != null){                
                 Source cellMultiplicationSource = new Source(source.getIdentifier());
                 cellMultiplicationSource.setMultiplicationFactor(multiplicationFactor);
