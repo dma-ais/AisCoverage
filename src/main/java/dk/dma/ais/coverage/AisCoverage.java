@@ -54,6 +54,7 @@ public final class AisCoverage {
 
         // Create AisBus
         aisBus = conf.getAisbusConfiguration().getInstance();
+        
 
         // Create web server
         if (conf.getServerConfiguration() != null) {

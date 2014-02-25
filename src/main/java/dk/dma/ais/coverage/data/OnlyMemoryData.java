@@ -21,17 +21,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import dk.dma.ais.coverage.Helper;
+import dk.dma.ais.coverage.calculator.AbstractCalculator;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 
 public class OnlyMemoryData implements ICoverageData {
 
     protected SourceHandler gridHandler = new SourceHandler();
+    private Map<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
 
     @Override
-    public Ship getShip(String sourceMmsi, long shipMmsi) {
-        return gridHandler.getGrid(sourceMmsi).getShip(shipMmsi);
+    public Ship getShip(int shipMmsi) {
+        return ships.get(shipMmsi);
     }
 
     @Override
@@ -41,7 +44,7 @@ public class OnlyMemoryData implements ICoverageData {
 
     @Override
     public Cell getCell(String sourceMmsi, double lat, double lon) {
-        return gridHandler.getGrid(sourceMmsi).getCell(lat, lon);
+        return gridHandler.getSource(sourceMmsi).getCell(lat, lon);
     }
 
     @Override
@@ -49,10 +52,15 @@ public class OnlyMemoryData implements ICoverageData {
         // TODO Auto-generated method stub
 
     }
+    
+    @Override
+    public Collection<Ship> getShips(){
+        return ships.values();
+    }
 
     private List<Cell> getCells() {
         List<Cell> cells = new ArrayList<Cell>();
-        Collection<Source> basestations = gridHandler.getBaseStations().values();
+        Collection<Source> basestations = gridHandler.getSources().values();
         for (Source basestation : basestations) {
             if (basestation.isVisible()) {
 
@@ -68,18 +76,20 @@ public class OnlyMemoryData implements ICoverageData {
     }
 
     @Override
-    public Ship createShip(String sourceMmsi, long shipMmsi, ShipClass shipClass) {
-        return gridHandler.getGrid(sourceMmsi).createShip(shipMmsi, shipClass);
+    public Ship createShip(int shipMmsi, ShipClass shipClass) {
+        Ship ship = new Ship(shipMmsi, shipClass);
+        ships.put(shipMmsi, ship);
+        return ship;
     }
 
     @Override
     public Cell createCell(String sourceMmsi, double lat, double lon) {
-        return gridHandler.getGrid(sourceMmsi).createCell(lat, lon);
+        return gridHandler.getSource(sourceMmsi).createCell(lat, lon);
     }
 
     @Override
     public Source getSource(String sourceId) {
-        return gridHandler.getBaseStations().get(sourceId);
+        return gridHandler.getSources().get(sourceId);
     }
 
     @Override
@@ -88,93 +98,46 @@ public class OnlyMemoryData implements ICoverageData {
     }
 
     @Override
-    public String[] getSourceNames() {
-        Set<String> set = gridHandler.getBaseStations().keySet();
-        String[] bssmsis = new String[set.size()];
-        int i = 0;
-        for (String s : set) {
-            bssmsis[i] = s;
-            i++;
-        }
-        return bssmsis;
-
-    }
-
-    @Override
     public Collection<Source> getSources() {
-        return gridHandler.getBaseStations().values();
+        return gridHandler.getSources().values();
     }
 
-    // @Override
-    // public double getLatSize() {
-    // return gridHandler.getLatSize();
-    // }
-    //
-    // @Override
-    // public double getLonSize() {
-    // return gridHandler.getLonSize();
-    // }
-
-    private List<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd, Map<String, Boolean> sources,
+    private List<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd, Set<String> sources,
             int multiplicationFactor, Date starttime, Date endtime) {
 
         List<Cell> cells = new ArrayList<Cell>();
-        Collection<Source> basestations = gridHandler.getBaseStations().values();
 
-        for (Source basestation : basestations) {
-            if (sources.containsKey(basestation.getIdentifier())) {
-
-                Source tempSource = new Source(basestation.getIdentifier());
-                tempSource.setMultiplicationFactor(multiplicationFactor);
-                // For each cell
-                Collection<Cell> bscells = basestation.getGrid().values();
+        
+        for (String sourcename : sources) {
+            
+            //Make new cells that matches the multiplication factor
+            Source source = gridHandler.getSources().get(sourcename);
+            if(source != null){                
+                Source cellMultiplicationSource = new Source(source.getIdentifier());
+                cellMultiplicationSource.setMultiplicationFactor(multiplicationFactor);
+                // Make 
+                Collection<Cell> bscells = source.getGrid().values();
                 for (Cell cell : bscells) {
-                    Cell tempCell = tempSource.getCell(cell.getLatitude(), cell.getLongitude());
-                    if (tempCell == null) {
-                        tempCell = tempSource.createCell(cell.getLatitude(), cell.getLongitude());
-                    }
-                    tempCell.addNOofMissingSignals((int) cell.getNOofMissingSignals(starttime, endtime));
-                    tempCell.addReceivedSignals(cell.getNOofReceivedSignals(starttime, endtime));
 
-                    // System.out.println(cell.getNOofReceivedSignals(starttime, endtime));
+                    if (Helper.isInsideBox(cell, latStart, lonStart, latEnd, lonEnd)) {
+                        Cell tempCell = cellMultiplicationSource.getCell(cell.getLatitude(), cell.getLongitude());
+                        if (tempCell == null) {
+                            tempCell = cellMultiplicationSource.createCell(cell.getLatitude(), cell.getLongitude());
+                        }
+                        tempCell.addNOofMissingSignals((int) cell.getNOofMissingSignals(starttime, endtime));
+                        tempCell.addReceivedSignals(cell.getNOofReceivedSignals(starttime, endtime));
+                    }
+
                 }
-
-                if (lonStart > lonEnd) {
                 
-                    // For each cell
-                    Collection<Cell> tempCells = tempSource.getGrid().values();
-                    for (Cell cell : tempCells) {
-
-                        if (cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd) {
-                            if (cell.getLongitude() >= lonStart || cell.getLongitude() <= lonEnd) {
-
-                                // Only add if cell has received message n given timespan
-                                if (cell.getNOofReceivedSignals() > 0) {
-                                    cells.add(cell);
-                                }
-                            }
-                        }
-
-                    }
-                } else {
-                    // For each cell
-                    Collection<Cell> tempCells = tempSource.getGrid().values();
-                    for (Cell cell : tempCells) {
-                        if (cell.getLatitude() <= latStart && cell.getLatitude() >= latEnd) {
-                            if (cell.getLongitude() >= lonStart && cell.getLongitude() <= lonEnd) {
-
-                                // Only add if cell has received message n given timespan
-                                if (cell.getNOofReceivedSignals() > 0) {
-                                    cells.add(cell);
-                                }
-                            }
-                        }
-
+                //add cells for particular source to cell-list.
+                for (Cell cell : cellMultiplicationSource.getGrid().values()) {
+                    if(cell.getNOofReceivedSignals() > 0){
+                        cells.add(cell);
                     }
                 }
             }
         }
-
         return cells;
     }
 

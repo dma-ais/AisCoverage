@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +35,10 @@ import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.CustomMessage;
 import dk.dma.ais.coverage.data.QueryParams;
+import dk.dma.ais.coverage.data.Ship;
+import dk.dma.ais.coverage.data.Ship.Hour;
 import dk.dma.ais.coverage.data.Source;
 import dk.dma.ais.coverage.data.Source.ReceiverType;
-import dk.dma.ais.coverage.data.SuperShip;
-import dk.dma.ais.coverage.data.SuperShip.Hour;
 import dk.dma.ais.coverage.data.TimeSpan;
 import dk.dma.ais.coverage.export.data.ExportShipTimeSpan;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
@@ -45,30 +46,8 @@ import dk.dma.ais.packet.AisPacketTags.SourceType;
 public class SatCalculator extends AbstractCalculator {
     private static final long serialVersionUID = 1L;
 
-    private Map<Integer, SuperShip> superships = new ConcurrentHashMap<Integer, SuperShip>();
-
-    public Map<Integer, SuperShip> getSuperships() {
-        return superships;
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(SatCalculator.class);
     private int timeMargin = 600000; // in ms
-    private LinkedHashMap<String, Boolean> doubletBufferSat = new LinkedHashMap<String, Boolean>() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
-            return this.size() > 10000;
-        }
-    };
-    private LinkedHashMap<String, Boolean> doubletBufferTerrestrial = new LinkedHashMap<String, Boolean>() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
-            return this.size() > 10000;
-        }
-    };
 
     /**
      * Retrieves a list of time spans based on a rectangle defined by two lat-lon points. Cells within the rectangle each contain a
@@ -90,11 +69,11 @@ public class SatCalculator extends AbstractCalculator {
             timespanMap.put(t.getFirstMessage().getTime(), t);
         }
 
-        Collection<Cell> cells = dataHandler.getSource("supersource").getGrid().values();
+        Collection<Cell> cells = dataHandler.getSource(AbstractCalculator.SUPERSOURCE_MMSI).getGrid().values();
 
         for (Cell fixedSpanCell : cells) {
-            if (fixedSpanCell.getLatitude() <= latMax && fixedSpanCell.getLatitude() >= latMin
-                    && fixedSpanCell.getLongitude() >= lonMin && fixedSpanCell.getLongitude() <= lonMax) {
+            
+            if (Helper.isInsideBox(fixedSpanCell, latMax, lonMin, lonMin, lonMax)) {
 
                 Collection<TimeSpan> spans = fixedSpanCell.getFixedWidthSpans().values();
                 for (TimeSpan timeSpan : spans) {
@@ -106,13 +85,12 @@ public class SatCalculator extends AbstractCalculator {
                 }
             }
         }
-//        System.out.println(timeDifference);
 
         return result;
     }
 
     public List<ExportShipTimeSpan> getShipDynamicTimeSpans(Date startTime, Date endTime, int shipMmsi) {
-        SuperShip ss = superships.get(shipMmsi);
+        Ship ss = dataHandler.getShip(shipMmsi);
         if (ss == null) {
             return null;
         }
@@ -178,8 +156,7 @@ public class SatCalculator extends AbstractCalculator {
         List<Cell> areaFiltered = new ArrayList<Cell>();
         for (Cell cell : cells) {
 
-            if (cell.getLatitude() <= latMax && cell.getLatitude() >= latMin && cell.getLongitude() >= lonMin
-                    && cell.getLongitude() <= lonMax) {
+            if (Helper.isInsideBox(cell, latMax, lonMin, lonMin, lonMax)) {
                 areaFiltered.add(cell);
             }
 
@@ -246,8 +223,8 @@ public class SatCalculator extends AbstractCalculator {
     }
 
     public Collection<Cell> getCells(double latStart, double lonStart, double latEnd, double lonEnd) {
-        Map<String, Boolean> sourcesMap = new HashMap<String, Boolean>();
-        sourcesMap.put("supersource", true);
+        Set<String> sourcesMap = new HashSet<String>();
+        sourcesMap.add(AbstractCalculator.SUPERSOURCE_MMSI);
         QueryParams params = new QueryParams();
         params.latStart = latStart;
         params.latEnd = latEnd;
@@ -261,9 +238,9 @@ public class SatCalculator extends AbstractCalculator {
 
     private void calcFixedTimeSpan(CustomMessage m) {
         // get the right cell, or create it if it doesn't exist.
-        Cell cell = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
+        Cell cell = dataHandler.getCell(AbstractCalculator.SUPERSOURCE_MMSI, m.getLatitude(), m.getLongitude());
         if (cell == null) {
-            cell = dataHandler.createCell("supersource", m.getLatitude(), m.getLongitude());
+            cell = dataHandler.createCell(AbstractCalculator.SUPERSOURCE_MMSI, m.getLatitude(), m.getLongitude());
         }
 
         // Fetch specific time span
@@ -275,6 +252,7 @@ public class SatCalculator extends AbstractCalculator {
             cell.getFixedWidthSpans().put(id.getTime(), fixedSpan);
         }
 
+        //Increment message counter and update distinct ship map
         if (m.getSourceType() == SourceType.SATELLITE) {
             fixedSpan.setMessageCounterSat(fixedSpan.getMessageCounterSat() + 1);
             fixedSpan.getDistinctShipsSat().put("" + m.getShipMMSI(), true);
@@ -282,6 +260,8 @@ public class SatCalculator extends AbstractCalculator {
             fixedSpan.incrementMessageCounterTerrestrialUnfiltered();
             fixedSpan.getDistinctShipsTerrestrial().put("" + m.getShipMMSI(), true);
         }
+        
+        
 
     }
 
@@ -304,25 +284,20 @@ public class SatCalculator extends AbstractCalculator {
             Helper.analysisStarted = Helper.getFloorDate(m.getTimestamp());
         }
 
-        // Register message in ship
-        SuperShip supership = superships.get((int) m.getShipMMSI());
-        if (supership == null) {
-            supership = new SuperShip();
-            superships.put((int) m.getShipMMSI(), supership);
-            supership = superships.get((int) m.getShipMMSI());
-        }
-        supership.registerMessage(m.getTimestamp(), (float) m.getLatitude(), (float) m.getLongitude());
-
         calcFixedTimeSpan(m);
 
         if (m.getSourceType() != SourceType.SATELLITE) {
             return;
         }
+        
+        // register ship location
+        dataHandler.getShip(m.getShipMMSI()).registerMessage(m.getTimestamp(), (float) m.getLatitude(), (float)m.getLongitude());
+
 
         // get the right cell, or create it if it doesn't exist.
-        Cell c = dataHandler.getCell("supersource", m.getLatitude(), m.getLongitude());
+        Cell c = dataHandler.getCell(AbstractCalculator.SUPERSOURCE_MMSI, m.getLatitude(), m.getLongitude());
         if (c == null) {
-            c = dataHandler.createCell("supersource", m.getLatitude(), m.getLongitude());
+            c = dataHandler.createCell(AbstractCalculator.SUPERSOURCE_MMSI, m.getLatitude(), m.getLongitude());
             c.setTimeSpans(new ArrayList<TimeSpan>());
         }
 
@@ -418,18 +393,6 @@ public class SatCalculator extends AbstractCalculator {
         return merged;
     }
 
-    @Override
-    /**
-     * Pretend that all messages are from same source
-     */
-    protected Source extractBaseStation(String baseId, ReceiverType receiverType) {
-        Source grid = dataHandler.getSource("supersource");
-        if (grid == null) {
-            grid = dataHandler.createSource("supersource");
-        }
-        return grid;
-    }
-
     /**
      * Rules for filtering
      */
@@ -441,33 +404,11 @@ public class SatCalculator extends AbstractCalculator {
         if (customMessage.getCog() == 360) {
             return true;
         }
-        if (isDoublet(customMessage)) {
-            return true;
-        }
 
         return false;
     }
 
-    private boolean isDoublet(CustomMessage m) {
-        String key = m.getKey();
 
-        if (m.getSourceType() != SourceType.SATELLITE) {
-            // if message exist in sat map return true, otherwise false.
-            if (doubletBufferSat.containsKey(key)) {
-                return true;
-            }
-            doubletBufferSat.put(key, true);
-            return false;
-        } else {
-            // if message exist in terrestrial map return true, otherwise false.
-            if (doubletBufferTerrestrial.containsKey(key)) {
-                return true;
-            }
-            doubletBufferTerrestrial.put(key, true);
-            return false;
-        }
-
-    }
 
     public class SortByDate implements Comparator<TimeSpan> {
 

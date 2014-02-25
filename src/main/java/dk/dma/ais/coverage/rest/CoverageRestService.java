@@ -20,9 +20,11 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -104,7 +106,8 @@ public class CoverageRestService {
     public Map<String, JsonSource> sources(@Context UriInfo uriInfo) {
         Objects.requireNonNull(handler);
         LOG.info("getting sources");
-        Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
+        Collection<Source> sources = handler.getDataHandler().getSources();
+        
         return JsonConverter.toJsonSources(sources);
     }
 
@@ -133,11 +136,11 @@ public class CoverageRestService {
         double latEnd = Double.parseDouble(areaArray[2]);
         double lonEnd = Double.parseDouble(areaArray[3]);
 
-        Map<String, Boolean> sourcesMap = new HashMap<String, Boolean>();
+        Set<String> sourcesMap = new HashSet<String>();
         if (sources != null) {
             String[] sourcesArray = sources.split(",");
             for (String string : sourcesArray) {
-                sourcesMap.put(string, true);
+                sourcesMap.add(string);
             }
         }
         JSonCoverageMap result = handler.getTerrestrialCoverage(latStart, lonStart, latEnd, lonEnd, sourcesMap, multiplicationFactor,
@@ -170,11 +173,11 @@ public class CoverageRestService {
         // helper.lonSize = lonsize*multiplicity;
         //
         //
-        Collection<Source> sources = handler.getDistributeCalc().getDataHandler().getSources();
+        Collection<Source> sources = handler.getDataHandler().getSources();
         //
         // Collection<BaseStation> superSource = covH.getSupersourceCalculator().getDataHandler().getSources();
         //
-        Source superbs = handler.getSupersourceCalc().getDataHandler().getSource("supersource");
+        Source superbs = handler.getDataHandler().getSource("supersource");
         //
         for (Source bs : sources) {
             Source summedbs = dh.createSource(bs.getIdentifier());
@@ -209,13 +212,13 @@ public class CoverageRestService {
         }
         if (exportType.equals("KML")) {
             // System.out.println(expotype);
-            KMLGenerator.generateKML(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
+            KMLGenerator.generateKML(dh.getSources(), AisCoverage.get().getConf().getLatSize(), AisCoverage.get().getConf().getLonSize(), multiplicity, response);
         } else if (exportType.equals("CSV")) {
             // System.out.println(expotype);
             // CSVGenerator.generateCSV(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
         } else if (exportType.equals("XML")) {
             // System.out.println(expotype);
-            XMLGenerator.generateXML(dh.getSources(), Helper.latSize, Helper.lonSize, multiplicity, response);
+            XMLGenerator.generateXML(dh.getSources(), AisCoverage.get().getConf().getLatSize(), AisCoverage.get().getConf().getLonSize(), multiplicity, response);
         } else {
             System.out.println("wrong exporttype");
         }
@@ -295,7 +298,7 @@ public class CoverageRestService {
         ServletOutputStream out = response.getOutputStream();
 
         ChartGenerator cg = new ChartGenerator();
-        if (!handler.getSatCalc().getSuperships().containsKey(shipmmsi)) {
+        if (handler.getDataHandler().getShip(shipmmsi) == null) {
             cg.printMessage("No such ship: " + shipmmsi);
         } else {
             List<ExportShipTimeSpan> spans = handler.getSatCalc().getShipDynamicTimeSpans(startDate, endDate, shipmmsi);
@@ -351,11 +354,6 @@ public class CoverageRestService {
         response.setContentType("image/png");
         // response.setHeader("Content-Disposition", "attachment; filename=" + "satexport.txt");
         ServletOutputStream out = response.getOutputStream();
-
-//        System.out.println(latMax);
-//        System.out.println(lonMin);
-//        System.out.println(latMin);
-//        System.out.println(lonMax);
 
         ChartGenerator cg = new ChartGenerator();
         if (satChartMethod.equals("satonly")) {
@@ -426,8 +424,8 @@ public class CoverageRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public Object status() throws IOException {
         LOG.info("getting status");
-        Date first = handler.getSupersourceCalc().getFirstMessage().getTimestamp();
-        Date last = handler.getSupersourceCalc().getCurrentMessage().getTimestamp();
+        Date first = Helper.firstMessage;
+        Date last = Helper.latestMessage;
 
         Status s = new Status();
         s.firstMessage = first.getTime();

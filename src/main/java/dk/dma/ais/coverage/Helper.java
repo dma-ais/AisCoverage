@@ -17,20 +17,18 @@ package dk.dma.ais.coverage;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 import dk.dma.ais.coverage.calculator.geotools.SphereProjection;
-import dk.dma.ais.coverage.data.Source_UserProvided;
+import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
+import dk.dma.ais.coverage.data.Cell;
 
 public class Helper {
 
-    public static double latSize = 0.022522522522522525;
-    public static double lonSize = 0.03868125413876516;
     public static Date analysisStarted;
     public static Date latestMessage;
-    public static int debugVerbosityLevel;
-    public static Map<String, Source_UserProvided> sourceInfo;
+    public static Date firstMessage;
     private static SphereProjection projection = new SphereProjection();
+    public static AisCoverageConfiguration conf;
 
     public static SphereProjection getProjection() {
         return projection;
@@ -69,17 +67,40 @@ public class Helper {
     }
 
     public static double roundLat(double latitude, int multiplicationFactor) {
-        double multiple = latSize * multiplicationFactor;
+        double multiple = conf.getLatSize() * multiplicationFactor;
         return multiple * Math.floor(latitude / multiple);
     }
 
     public static double roundLon(double longitude, int multiplicationFactor) {
-        double multiple = lonSize * multiplicationFactor;
+        double multiple = conf.getLonSize() * multiplicationFactor;
         return multiple * Math.floor(longitude / multiple);
     }
     
     public static void setLatLonSize(int meters, double latitude){
-        latSize = SphereProjection.metersToLatDegree(meters);
-        lonSize = SphereProjection.metersToLonDegree(latitude, meters);
+        conf.setLatSize(SphereProjection.metersToLatDegree(meters));
+        conf.setLonSize(SphereProjection.metersToLonDegree(latitude, meters));
+    }
+    
+    public static boolean isInsideBox(Cell c, double latStart, double lonStart, double latEnd, double lonEnd){
+        if (lonStart > lonEnd) {
+
+            if (c.getLatitude() <= latStart && c.getLatitude() >= latEnd) {
+                if (c.getLongitude() >= lonStart || c.getLongitude() <= lonEnd) {
+
+                    return true;
+                }
+            }
+
+        } else {
+
+            if (c.getLatitude() <= latStart && c.getLatitude() >= latEnd) {
+                if (c.getLongitude() >= lonStart && c.getLongitude() <= lonEnd) {
+
+                    return true;
+                }
+            }
+
+        }
+        return false;
     }
 }

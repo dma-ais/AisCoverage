@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import dk.dma.ais.coverage.calculator.AbstractCalculator;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.Source;
 import dk.dma.ais.coverage.data.TimeSpan;
@@ -31,25 +32,27 @@ public class JsonConverter {
     public static Map<String, JsonSource> toJsonSources(Collection<Source> sources) {
         Map<String, JsonSource> sourcesMap = new HashMap<String, JsonSource>();
         for (Source baseStation : sources) {
-            JsonSource s = new JsonSource();
-            s.mmsi = baseStation.getIdentifier();
-
-            if (baseStation.getName().equals("")) {
-                s.name = baseStation.getIdentifier();
-            } else {
-                s.name = baseStation.getName();
+            if(!baseStation.getIdentifier().equals(AbstractCalculator.SUPERSOURCE_MMSI)){
+                JsonSource s = new JsonSource();
+                s.mmsi = baseStation.getIdentifier();
+    
+                if (baseStation.getName().equals("")) {
+                    s.name = baseStation.getIdentifier();
+                } else {
+                    s.name = baseStation.getName();
+                }
+                s.type = baseStation.getReceiverType().name();
+    
+                if (baseStation.getLatitude() != null) {
+                    s.lat = baseStation.getLatitude();
+                }
+    
+                if (baseStation.getLongitude() != null) {
+                    s.lon = baseStation.getLongitude();
+                }
+    
+                sourcesMap.put(s.mmsi, s);
             }
-            s.type = baseStation.getReceiverType().name();
-
-            if (baseStation.getLatitude() != null) {
-                s.lat = baseStation.getLatitude();
-            }
-
-            if (baseStation.getLongitude() != null) {
-                s.lon = baseStation.getLongitude();
-            }
-
-            sourcesMap.put(s.mmsi, s);
         }
         return sourcesMap;
     }

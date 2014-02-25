@@ -17,6 +17,10 @@ package dk.dma.ais.coverage.data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
@@ -33,8 +37,8 @@ public class CustomMessage implements Serializable {
     private double latitude;
     private double longitude;
     private long timestamp;
-    private String sourceMMSI;
-    private long shipMMSI;
+    private Set<String> sourceList = new HashSet<String>();
+    private int shipMMSI;
     private long timeSinceLastMsg;
     private String key;
     private SourceType sourceType;
@@ -48,11 +52,7 @@ public class CustomMessage implements Serializable {
     }
 
     public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
+        return getCog() + "" + getLatitude() + "" + getLongitude() + "" + getShipMMSI() + "" + getSog();
     }
 
     public double getCog() {
@@ -95,20 +95,19 @@ public class CustomMessage implements Serializable {
         this.timestamp = timestamp.getTime();
     }
 
-    public String getSourceMMSI() {
-        return sourceMMSI;
+    public Set<String> getSourceList() {
+        return sourceList;
+    }
+    public void addSourceMMSI(String source){
+        sourceList.add(source);
     }
 
-    public long getShipMMSI() {
+    public int getShipMMSI() {
         return shipMMSI;
     }
 
-    public void setShipMMSI(long shipMMSI) {
+    public void setShipMMSI(int shipMMSI) {
         this.shipMMSI = shipMMSI;
-    }
-
-    public void setSourceMMSI(String sourceMMSI) {
-        this.sourceMMSI = sourceMMSI;
     }
 
     public long getTimeSinceLastMsg() {

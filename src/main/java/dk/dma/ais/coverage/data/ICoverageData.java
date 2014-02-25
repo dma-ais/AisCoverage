@@ -23,8 +23,9 @@ import dk.dma.ais.coverage.data.Ship.ShipClass;
 
 public interface ICoverageData {
 
-    Ship createShip(String sourceMmsi, long shipMmsi, ShipClass shipClass);
-    Ship getShip(String sourceMmsi, long shipMmsi);
+    Ship createShip(int shipMmsi, ShipClass shipClass);
+    Ship getShip(int shipMmsi);
+    Collection<Ship> getShips();
     void updateShip(Ship ship);
     Cell createCell(String sourceMmsi, double lat, double lon);
     Cell getCell(String sourceMmsi, double lat, double lon);
@@ -32,7 +33,6 @@ public interface ICoverageData {
     List<Cell> getCells(QueryParams params);
     Source getSource(String sourceId);
     Source createSource(String sourceId);
-    String[] getSourceNames();
     Collection<Source> getSources();
     void incrementReceivedSignals(String sourceMmsi, double lat, double lon, Date timestamp);
     void incrementMissingSignals(String sourceMmsi, double lat, double lon, Date timestamp);

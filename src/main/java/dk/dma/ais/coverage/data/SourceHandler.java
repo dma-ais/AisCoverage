@@ -20,11 +20,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import dk.dma.ais.coverage.calculator.AbstractCalculator;
+
 public class SourceHandler implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private ConcurrentHashMap<String, Source> baseStations = new ConcurrentHashMap<String, Source>();
-
+    
+    public SourceHandler(){
+        baseStations.put(AbstractCalculator.SUPERSOURCE_MMSI, new Source(AbstractCalculator.SUPERSOURCE_MMSI));
+    }
 
     /*
      * Create grid associated to a specific transponder
@@ -32,12 +37,6 @@ public class SourceHandler implements Serializable {
     public Source createGrid(String bsMmsi) {
         Source grid = new Source(bsMmsi);
         baseStations.put(bsMmsi, grid);
-
-        // AisEvent event = new AisEvent();
-        // event.setEvent(AisEvent.Event.BS_ADDED);
-        // event.setSource(this);
-        // event.setEventObject(grid);
-        // ProjectHandler.getInstance().broadcastEvent(event);
 
         return grid;
     }
@@ -53,17 +52,14 @@ public class SourceHandler implements Serializable {
         Source baseStation = baseStations.get(mmsi);
         if (baseStation != null) {
             baseStation.setVisible(b);
-
-            // ProjectHandler.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_VISIBILITY_CHANGED, calculator,
-            // baseStation));
         }
     }
 
-    public Source getGrid(String bsMmsi) {
+    public Source getSource(String bsMmsi) {
         return baseStations.get(bsMmsi);
     }
 
-    public Map<String, Source> getBaseStations() {
+    public Map<String, Source> getSources() {
         return baseStations;
     }
 }

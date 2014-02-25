@@ -15,17 +15,21 @@
  */
 package dk.dma.ais.coverage;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.dma.ais.coverage.calculator.TerrestrialDistributor;
+import dk.dma.ais.coverage.calculator.AbstractCalculator;
 import dk.dma.ais.coverage.calculator.SatCalculator;
-import dk.dma.ais.coverage.calculator.TerrestrialSuperSourceCalculator;
+import dk.dma.ais.coverage.calculator.TerrestrialCalculator;
 import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.coverage.data.Cell;
 import dk.dma.ais.coverage.data.CustomMessage;
@@ -34,7 +38,6 @@ import dk.dma.ais.coverage.data.OnlyMemoryData;
 import dk.dma.ais.coverage.data.QueryParams;
 import dk.dma.ais.coverage.data.Ship;
 import dk.dma.ais.coverage.data.Source;
-import dk.dma.ais.coverage.data.SuperShip;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
 import dk.dma.ais.coverage.data.Source.ReceiverType;
 import dk.dma.ais.coverage.event.AisEvent;
@@ -46,8 +49,10 @@ import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage4;
 import dk.dma.ais.message.AisPositionMessage;
 import dk.dma.ais.packet.AisPacket;
+import dk.dma.ais.packet.AisPacketTags;
 import dk.dma.ais.packet.AisPacketTags.SourceType;
 import dk.dma.ais.proprietary.IProprietarySourceTag;
+import dk.dma.enav.model.geometry.Position;
 
 /**
  * Handler for received AisPackets
@@ -56,12 +61,28 @@ public class CoverageHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoverageHandler.class);
     
-    //Calculators used for processing AIS messages received by terrestrial receivers.
-    private TerrestrialSuperSourceCalculator superCalc;
-    private TerrestrialDistributor distributeOnlyCalc;
+    //list of calculators
+    private ArrayList<AbstractCalculator> calculators = new ArrayList<AbstractCalculator>();
+    private ICoverageData dataHandler;
     
-    //Used for processing AIS messages received by satellite receivers.
-    private SatCalculator satCalc;
+    public ICoverageData getDataHandler() {
+        return dataHandler;
+    }
+
+    public void setDataHandler(ICoverageData dataHandler) {
+        this.dataHandler = dataHandler;
+    }
+
+    //A doublet filtered message buffer, where a custom message will include a list of all sources
+    private LinkedHashMap<String, CustomMessage> doubletBuffer = new LinkedHashMap<String, CustomMessage>() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, CustomMessage> eldest) {
+            process(eldest.getValue());
+            return this.size() > 10000;
+        }
+    };
       
     //Fields used for debugging purposes
     private int unfiltCount;
@@ -70,37 +91,31 @@ public class CoverageHandler {
     private int delayedMoreThanTen;
     private int delayedLessThanTen;
 
+    private AisCoverageConfiguration conf;
+
     public CoverageHandler(AisCoverageConfiguration conf) {
-
-        //Storing source information provided by the user
-        Helper.sourceInfo = conf.getSourceNameMap();
+        this.conf=conf;
+        Helper.conf=conf;
         
-        //setting up the calculators
-        superCalc = new TerrestrialSuperSourceCalculator(false);
-        distributeOnlyCalc = new TerrestrialDistributor();
-        superCalc.addListener(distributeOnlyCalc);
-        satCalc = new SatCalculator();
-
-        // Setting data handlers
-        if (conf.getDatabaseConfiguration().getType().toLowerCase().equals("memoryonly")) {
-            ICoverageData dataH = new OnlyMemoryData();
-            distributeOnlyCalc.setDataHandler(new OnlyMemoryData());
-            superCalc.setDataHandler(dataH);
-            satCalc.setDataHandler(dataH);
-            LOG.info("coverage calculators set up with memory only data handling");
-        }else{
-            //it is still an issue how to store data on disk.
+        //Creating up data handler
+        dataHandler = new OnlyMemoryData();
+        LOG.info("coverage calculators set up with memory only data handling");
+        
+        //creating calculators
+        calculators.add(new TerrestrialCalculator(false));
+        calculators.add(new SatCalculator());
+        
+        for (AbstractCalculator calc : calculators) {
+            calc.setDataHandler(dataHandler);
         }
 
-        // setting grid granularity
-        Helper.latSize = conf.getLatSize();
-        Helper.lonSize = conf.getLonSize();
+        // Logging grid granularity
         LOG.info("grid granularity initiated with lat: " + conf.getLatSize() + " and lon: " + conf.getLonSize()); 
         
-        // One could also set grid granularity based on meter scale and a latitude position like this
+        // One could set grid granularity based on meter scale and a latitude position like this
             // Helper.setLatLonSize(meters, latitude);
         
-        if (Helper.debugVerbosityLevel > 0) {
+        if (conf.getVerbosityLevel() > 0) {
             verboseDebug();
         }
 
@@ -108,19 +123,142 @@ public class CoverageHandler {
 
     public void receiveUnfiltered(AisPacket packet) {
         unfiltCount++;
-        superCalc.processMessage(packet, "supersource");
-        distributeOnlyCalc.processMessage(packet, "1");
-        satCalc.processMessage(packet, "sat");
+        //extracts packet information
+        preProcess(packet);
+    }
+    
+    private void process(CustomMessage m){
+        for (AbstractCalculator calc : calculators) {
+            calc.calculate(m);
+        }
+    }
+    
+    private void preProcess(AisPacket packet){
+        AisMessage aisMessage = packet.tryGetAisMessage();
+        if (aisMessage == null) {
+            return;
+        }
+        
+        String baseId = "default"; //the default id
+        ReceiverType receiverType = ReceiverType.NOTDEFINED;
+        Date timestamp = null;
+        ShipClass shipClass = null;
+        AisPositionMessage posMessage;
+        SourceType sourceType = SourceType.TERRESTRIAL;
+
+        // Get source tag properties
+        IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
+        AisPacketTags packetTags = packet.getTags();
+        
+        //Determine if source is sat or terrestrial
+        if(packetTags != null && packetTags.getSourceType() == SourceType.SATELLITE){
+            sourceType = SourceType.SATELLITE;
+        }
+
+        //Determine source mmsi and receivertype    
+        if (sourceTag != null) {
+            timestamp = sourceTag.getTimestamp();
+            if(sourceTag.getBaseMmsi() != null){ //it's a base station
+                baseId=sourceTag.getBaseMmsi()+"";   
+                receiverType = ReceiverType.BASESTATION;
+            }else if(!sourceTag.getRegion().equals("")){ //It's a region
+                baseId=sourceTag.getRegion();
+                receiverType=ReceiverType.REGION;
+            }
+        }
+
+
+        // If time stamp is not present, we add one
+        //TODO this only makes sense for real-time data. We should check if it is real-time
+        if (timestamp == null) {
+            timestamp = new Date();
+        }
+        
+        if(Helper.firstMessage == null){
+            Helper.firstMessage = Helper.getFloorDate(timestamp);
+        }
+
+        // It's a base station position message
+        if (aisMessage instanceof AisMessage4) {
+            Source b = dataHandler.getSource(baseId);
+            AisMessage4 m = (AisMessage4) aisMessage;
+            if (conf.getSourceNameMap() != null && conf.getSourceNameMap().containsKey(baseId)) {
+                //user already provided name and location for this source
+            } else if (b != null) {
+                Position pos = m.getPos().getGeoLocation();
+                if (pos != null ) {
+                    b.setLatitude(m.getPos().getGeoLocation().getLatitude());
+                    b.setLongitude(m.getPos().getGeoLocation().getLongitude());
+                }
+            }
+            return;
+        }
+
+
+        // Handle position messages. If it's not a position message
+        // the calculators can't use them
+        if (aisMessage instanceof AisPositionMessage) {
+            posMessage = (AisPositionMessage) aisMessage;
+        } else {
+            return;
+        }
+
+        // Check if position is valid
+        if (!posMessage.isPositionValid()) {
+            return;
+        }
+        
+        // Extract Base station
+        Source source = dataHandler.getSource(baseId);
+        if (source == null) {
+            //source wasn't found, we need to create
+            source = dataHandler.createSource(baseId);
+            source.setReceiverType(receiverType);
+            
+            //Let's check if user provided a name and position for this source
+            if (conf.getSourceNameMap() != null && conf.getSourceNameMap().containsKey(baseId)) {
+                source.setLatitude(conf.getSourceNameMap().get(baseId).getLatitude());
+                source.setLongitude(conf.getSourceNameMap().get(baseId).getLongitude());   
+                source.setName(conf.getSourceNameMap().get(baseId).getName());
+            }
+        }
+        
+
+        //Extract ship
+        Ship ship = dataHandler.getShip(aisMessage.getUserId());
+        if (ship == null) {
+            ship = dataHandler.createShip(aisMessage.getUserId(), shipClass);
+        }
+        
+        CustomMessage newMessage = new CustomMessage();
+        newMessage.setCog((double) posMessage.getCog() / 10);
+        newMessage.setSog((double) posMessage.getSog() / 10);
+        newMessage.setLatitude(posMessage.getPos().getGeoLocation().getLatitude());
+        newMessage.setLongitude(posMessage.getPos().getGeoLocation().getLongitude());
+        newMessage.setTimestamp(timestamp);
+        newMessage.addSourceMMSI(baseId);
+        newMessage.setShipMMSI(aisMessage.getUserId());
+        newMessage.setSourceType(sourceType);
+        
+        String key = newMessage.getKey();
+
+        // if message exist in queue return true, otherwise false.
+        CustomMessage existing = doubletBuffer.get(key);
+        if (existing == null) {
+            doubletBuffer.put(key, newMessage);
+        }else{
+            existing.addSourceMMSI(baseId);
+        }
     }
 
     //TODO consider moving this method to a calculator
     public JSonCoverageMap getTerrestrialCoverage(double latStart, double lonStart, double latEnd, double lonEnd,
-            Map<String, Boolean> sources, int multiplicationFactor, Date starttime, Date endtime) {
+            Set<String> sources, int multiplicationFactor, Date starttime, Date endtime) {
 
         
         JSonCoverageMap map = new JSonCoverageMap();
-        map.latSize = Helper.latSize * multiplicationFactor;
-        map.lonSize = Helper.lonSize * multiplicationFactor;
+        map.latSize = conf.getLatSize() * multiplicationFactor;
+        map.lonSize = conf.getLonSize() * multiplicationFactor;
 
         HashMap<String, ExportCell> JsonCells = new HashMap<String, ExportCell>();
 
@@ -134,11 +272,11 @@ public class CoverageHandler {
         params.startDate = starttime;
         params.endDate = endtime;
 
-        List<Cell> celllist = distributeOnlyCalc.getDataHandler().getCells(params);
-        HashMap<String, Boolean> superSourceIsHere = new HashMap<String, Boolean>();
-        superSourceIsHere.put("supersource", true);
+        List<Cell> celllist = calculators.get(0).getDataHandler().getCells(params);
+        Set<String> superSourceIsHere = new HashSet<String>();
+        superSourceIsHere.add(AbstractCalculator.SUPERSOURCE_MMSI);
         params.sources = superSourceIsHere;
-        List<Cell> celllistSuper = superCalc.getDataHandler().getCells(params);
+        List<Cell> celllistSuper = calculators.get(0).getDataHandler().getCells(params);
         Map<String, Cell> superMap = new HashMap<String, Cell>();
         for (Cell cell : celllistSuper) {
             if (cell.getNOofReceivedSignals() > 0) {
@@ -147,7 +285,7 @@ public class CoverageHandler {
         }
 
         if (!celllist.isEmpty()) {
-            map.latSize = Helper.latSize * multiplicationFactor;
+            map.latSize = conf.getLatSize() * multiplicationFactor;
         }
 
         for (Cell cell : celllist) {
@@ -155,31 +293,18 @@ public class CoverageHandler {
             if (superCell == null) {
 
             } else {
-                ExportCell existing = JsonCells.get(cell.getId());
-                ExportCell theCell = JsonConverter.toJsonCell(cell, superCell, starttime, endtime);
-                if (existing == null) {
-                    existing = JsonCells.put(cell.getId(), JsonConverter.toJsonCell(cell, superCell, starttime, endtime));
-                } else if (theCell.getCoverage() > existing.getCoverage()) {
-                    JsonCells.put(cell.getId(), theCell);
-                }
+                    ExportCell existing = JsonCells.get(cell.getId());
+                    ExportCell theCell = JsonConverter.toJsonCell(cell, superCell, starttime, endtime);
+                    if (existing == null || theCell.getCoverage() > existing.getCoverage()) {
+                        JsonCells.put(cell.getId(), theCell);
+                    }
+                
             }
         }
 
         map.cells = JsonCells;
 
         return map;
-    }
-
-    public TerrestrialDistributor getDistributeCalc() {
-        return distributeOnlyCalc;
-    }
-
-    public TerrestrialSuperSourceCalculator getSupersourceCalc() {
-        return superCalc;
-    }
-
-    public SatCalculator getSatCalc() {
-        return satCalc;
     }
     
     public void verboseDebug(){
@@ -199,40 +324,38 @@ public class CoverageHandler {
                     // System.out.println((((now.getTime()-then.getTime())/1000)));
                     LOG.info("messages per second: " + (unfiltCount / (((now.getTime() - then.getTime()) / 1000))));
                     LOG.info("messages processed: " + unfiltCount);
-                    LOG.info("biggest delay in minutes: " + biggestDelay / 1000 / 60);
-                    LOG.info("weird stamps: " + weird);
-                    LOG.info("delayed more than ten min: " + delayedMoreThanTen);
-                    LOG.info("delayed less than ten min: " + delayedLessThanTen);
-                    long numberofcells = 0;
-                    long uniquecells = 0;
-                    long uniqueships = 0;
-                    long uniqueShipHours = 0;
-                    for (SuperShip ss : satCalc.getSuperships().values()) {
-                        uniqueShipHours += ss.getHours().size();
-                    }
-                    // for (Integer iterable_element : satCalc.getSuperships().keySet()) {
-                    // System.out.println(iterable_element);
-                    // }
-                    for (Source s : satCalc.getDataHandler().getSources()) {
-                        numberofcells += s.getGrid().size();
-                        uniquecells += s.getGrid().size();
-                        uniqueships += s.getShips().size();
-                    }
-                    for (Source s : distributeOnlyCalc.getDataHandler().getSources()) {
-                        numberofcells += s.getGrid().size();
-                    }
-                    LOG.info("total cells: " + numberofcells);
-                    LOG.info("Unique cells: " + uniquecells);
-                    LOG.info("Unique ships: " + uniqueships);
-                    LOG.info("Unique ship hours: " + uniqueShipHours);
-                    LOG.info(""+satCalc.getDataHandler().getSources().size());
-                    LOG.info("");
+//                    LOG.info("biggest delay in minutes: " + biggestDelay / 1000 / 60);
+//                    LOG.info("weird stamps: " + weird);
+//                    LOG.info("delayed more than ten min: " + delayedMoreThanTen);
+//                    LOG.info("delayed less than ten min: " + delayedLessThanTen);
+//                    long numberofcells = 0;
+//                    long uniquecells = 0;
+//                    long uniqueships = 0;
+//                    long uniqueShipHours = 0;
+//                    for (Ship ss : dataHandler.getShips()) {
+//                        uniqueShipHours += ss.getHours().size();
+//                    }
+//                    for (String sourcename : dataHandler.getSourceNames()) {
+//                        
+//                    }
+//
+//                    
+//                    LOG.info("Unique cells: " + dataHandler.getSource("supersource").getGrid().size());
+//                    LOG.info("total cell timespans: " + numberofcells);
+//                    LOG.info("Unique ships: " + dataHandler.getShips().size());
+//                    LOG.info("Unique ship hours: " + uniqueShipHours);
+//                    LOG.info(""+calculators.get(0).getDataHandler().getSources().size());
+//                    LOG.info("");
                 }
 
             }
         });
 
         t.start();
+    }
+
+    public SatCalculator getSatCalc() {
+        return (SatCalculator) calculators.get(1);
     }
 
 }

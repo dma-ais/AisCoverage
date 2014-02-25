@@ -69,6 +69,8 @@ public abstract class AbstractCalculator implements Serializable {
     protected int minAllowedSpeed = 3;
     protected int maxAllowedSpeed = 50;
     protected transient SphereProjection projection = new SphereProjection();
+    public static final String SUPERSOURCE_MMSI = "supersource";
+    
 //    private int cellSize = 2500;
 
     public double getFilterTimeDifference() {
@@ -104,24 +106,6 @@ public abstract class AbstractCalculator implements Serializable {
     }
 
     public abstract void calculate(CustomMessage m);
-
-    /**
-     * This is called by message handlers whenever a new message is received.
-     */
-    public void processMessage(AisPacket packet, String defaultID) {
-
-        AisMessage message = packet.tryGetAisMessage();
-        if (message == null) {
-            return;
-        }
-
-        CustomMessage newMessage = aisToCustom(message, defaultID);
-        if (newMessage != null) {
-
-            // newMessage.setSourceType(packet.getTags().getSourceType());
-            calculate(newMessage);
-        }
-    }
 
     /**
      * Determines the expected transmitting frequency, based on speed over ground(sog), whether the ship is rotating and ship class.
@@ -176,7 +160,7 @@ public abstract class AbstractCalculator implements Serializable {
             return true;
         }
 
-        Ship ship = dataHandler.getShip(customMessage.getSourceMMSI(), customMessage.getShipMMSI());
+        Ship ship = dataHandler.getShip(customMessage.getShipMMSI());
 
         CustomMessage firstMessage = ship.getFirstMessageInBuffer();
         CustomMessage lastMessage = ship.getLastMessageInBuffer();
@@ -198,20 +182,6 @@ public abstract class AbstractCalculator implements Serializable {
 
         }
         return false;
-    }
-
-    protected void extractBaseStationPosition(AisMessage4 m) {
-        Source b = dataHandler.getSource(m.getUserId() + "");
-
-        if (b != null) {
-            Position pos = m.getPos().getGeoLocation();
-            if (pos != null) {
-                b.setLatitude(m.getPos().getGeoLocation().getLatitude());
-                b.setLongitude(m.getPos().getGeoLocation().getLongitude());
-
-                EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));
-            }
-        }
     }
 
     protected boolean isShipAllowed(AisMessage aisMessage) {
@@ -238,187 +208,15 @@ public abstract class AbstractCalculator implements Serializable {
         return true;
     }
 
-    protected ShipClass extractShipClass(AisMessage aisMessage) {
-        if (aisMessage.getMsgId() == 18) {
-            // class B
-            return Ship.ShipClass.CLASS_B;
-        } else {
-            // class A
-            return Ship.ShipClass.CLASS_A;
-        }
-    }
-
-
-    /**
-     * Check if grid exists (If a message with that bsmmsi has been received before) Otherwise create a grid for corresponding base
-     * station.
-     */
-    protected Source extractBaseStation(String baseId, ReceiverType receiverType) {
-        Source grid = dataHandler.getSource(baseId);
-        if (grid == null) {
-            grid = dataHandler.createSource(baseId);
-            grid.setReceiverType(receiverType);
-        }
-        return grid;
-    }
-
-    /**
-     * Check which ship sent the message. If it's the first message from that ship, create ship and put it in base statino that
-     * received message
-     */
-    protected Ship extractShip(long mmsi, ShipClass shipClass, Source baseStation) {
-        Ship ship = dataHandler.getShip(baseStation.getIdentifier(), mmsi);
-        if (ship == null) {
-            ship = dataHandler.createShip(baseStation.getIdentifier(), mmsi, shipClass);
-        }
-        return ship;
-    }
-
-    /**
-     * The aisToCustom method is used to map AisMessages to CustomMessages. It also takes care of creating base station instances,
-     * ship instances and to set up references between these. Override it if you want to handle this in a different way.
-     */
-    public CustomMessage aisToCustom(AisMessage aisMessage, String defaultID) {
-
-        // Stops analysis if project has been running longer than timeout
-        // long timeSinceStart = project.getRunningTime();
-        // if (project.getTimeout() != -1 && timeSinceStart > project.getTimeout())
-        // project.stopAnalysis();
-
-        String baseId = null;
-        String name = "";
-        ReceiverType receiverType = ReceiverType.NOTDEFINED;
-        // IGeneralPositionMessage posMessage = null;
-        // GeoLocation pos = null;
-        Date timestamp = null;
-        ShipClass shipClass = null;
-        AisPositionMessage posMessage;
-        SourceType sourceType = SourceType.TERRESTRIAL;
-
-        // Get source tag properties
-        IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
-
-        if (sourceTag != null) {
-            Integer bsmmsi = sourceTag.getBaseMmsi();
-            timestamp = sourceTag.getTimestamp();
-            // srcCountry = sourceTag.getCountry();
-            String region = sourceTag.getRegion();
-
-            // hardcode sat status until aisbus supports pull requests..
-            if (region != null) {
-                if (region.equals("802") || region.equals("804") || region.equals("810")) {
-                    sourceType = SourceType.SATELLITE;
-                }
-            }
-
-            if (!defaultID.equals("sat")) {
-                if (bsmmsi == null) {
-                    if (!region.equals("")) {
-                        if (Helper.sourceInfo != null && Helper.sourceInfo.containsKey(region)) {
-                            name = Helper.sourceInfo.get(region).getName();
-                            Source b = dataHandler.getSource(region);
-
-                            if (b != null) {
-                                b.setLatitude(Helper.sourceInfo.get(region).getLatitude());
-                                b.setLongitude(Helper.sourceInfo.get(region).getLongitude());
-                                EventBroadcaster.getInstance().broadcastEvent(
-                                        new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));
-                            }
-                        }
-                        baseId = region;
-                        receiverType = ReceiverType.REGION;
-                    }
-                } else {
-                    if (Helper.sourceInfo != null && Helper.sourceInfo.containsKey(bsmmsi.toString())) {
-                        name = Helper.sourceInfo.get(bsmmsi.toString()).getName();
-                        Source b = dataHandler.getSource(bsmmsi + "");
-
-                        if (b != null) {
-                            b.setLatitude(Helper.sourceInfo.get(bsmmsi.toString()).getLatitude());
-                            b.setLongitude(Helper.sourceInfo.get(bsmmsi.toString()).getLongitude());
-                            EventBroadcaster.getInstance().broadcastEvent(new AisEvent(AisEvent.Event.BS_POSITION_FOUND, this, b));
-                        }
-                    }
-                    baseId = bsmmsi + "";
-                    receiverType = ReceiverType.BASESTATION;
-                }
-            }
-
-        }
-
-        // Checks if its neither a basestation nor a region
-        if (baseId == null) {
-            baseId = defaultID;
-        }
-
-        // If time stamp is not present, we add one
-        if (timestamp == null) {
-            timestamp = new Date();
-        }
-
-        // It's a base station positiion message
-        if (aisMessage instanceof AisMessage4) {
-            extractBaseStationPosition((AisMessage4) aisMessage);
-            return null;
-        }
-
-        // if no allowed ship types has been set, we process all ship types
-        if (!isShipAllowed(aisMessage)) {
-            return null;
-        }
-
-        // Handle position messages. If it's not a position message
-        // the calculators can't use them
-        if (aisMessage instanceof AisPositionMessage) {
-            posMessage = (AisPositionMessage) aisMessage;
-        } else {
-            return null;
-        }
-
-        // Check if position is valid
-        if (!posMessage.isPositionValid()) {
-            return null;
-        }
-
-        // Extract Base station
-        Source baseStation = extractBaseStation(baseId, receiverType);
-        baseStation.setName(name);
-
-        //Extract ship
-        Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
-
-
-        CustomMessage newMessage = new CustomMessage();
-        newMessage.setCog((double) posMessage.getCog() / 10);
-        newMessage.setSog((double) posMessage.getSog() / 10);
-        newMessage.setLatitude(posMessage.getPos().getGeoLocation().getLatitude());
-        newMessage.setLongitude(posMessage.getPos().getGeoLocation().getLongitude());
-        newMessage.setTimestamp(timestamp);
-        newMessage.setSourceMMSI(baseStation.getIdentifier());
-        newMessage.setShipMMSI(aisMessage.getUserId());
-        // newMessage.setOriginalMessage(aisMessage);
-        newMessage.setKey(messageToKey(newMessage));
-        newMessage.setSourceType(sourceType);
-
-        // Keep track of current message
-        currentMessage = newMessage;
-
-        // Keep track of first message
-        if (firstMessage == null) {
-            firstMessage = newMessage;
-        }
-
-        // return null;
-        return newMessage;
-    }
-
-    protected String messageToKey(CustomMessage m) {
-        return m.getCog() + "" + m.getLatitude() + "" + m.getLongitude() + "" + m.getShipMMSI() + "" + m.getSog();
-
-        // return m.getCog()+""+m.getLatitude()+""+m.getLongitude()+""+m.getShipMMSI()+""+m.getSog()+""+m.getSourceMMSI();
-        // return m.getShipMMSI()+""+m.getTimestamp().getTime();
-        // return m.getShipMMSI()+""+m.getLatitude()+""+m.getLongitude();
-    }
+//    protected ShipClass extractShipClass(AisMessage aisMessage) {
+//        if (aisMessage.getMsgId() == 18) {
+//            // class B
+//            return Ship.ShipClass.CLASS_B;
+//        } else {
+//            // class A
+//            return Ship.ShipClass.CLASS_A;
+//        }
+//    }
 
     // getters and setters
     public ICoverageData getDataHandler() {
@@ -433,8 +231,8 @@ public abstract class AbstractCalculator implements Serializable {
     /**
      * Time difference between two messages in seconds
      */
-    public double getTimeDifference(CustomMessage m1, CustomMessage m2) {
-        return (double) Math.abs(((m2.getTimestamp().getTime() - m1.getTimestamp().getTime())) / 1000);
+    public int getTimeDifference(CustomMessage m1, CustomMessage m2) {
+        return (int) Math.abs(((m2.getTimestamp().getTime() - m1.getTimestamp().getTime())) / 1000);
     }
 
     public double getTimeDifference(Long m1, Long m2) {

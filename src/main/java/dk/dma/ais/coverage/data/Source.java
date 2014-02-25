@@ -26,7 +26,6 @@ public class Source implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private Map<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
-    private Map<Long, Ship> ships = new ConcurrentHashMap<Long, Ship>();
     private String name = "";
     private String identifier;
     private double latitude;
@@ -104,30 +103,12 @@ public class Source implements Serializable {
         return cell;
     }
 
-    public Ship createShip(Long mmsi, ShipClass shipClass) {
-        Ship ship = new Ship(mmsi, shipClass);
-        ships.put(mmsi, ship);
-        return ship;
-    }
-
-    public Ship getShip(Long mmsi) {
-        return ships.get(mmsi);
-    }
-
     public Map<String, Cell> getGrid() {
         return grid;
     }
 
     public void setGrid(ConcurrentHashMap<String, Cell> grid) {
         this.grid = grid;
-    }
-
-    public Map<Long, Ship> getShips() {
-        return ships;
-    }
-
-    public void setShips(ConcurrentHashMap<Long, Ship> ships) {
-        this.ships = ships;
     }
 
     public String getIdentifier() {

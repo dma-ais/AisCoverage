@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -42,14 +43,15 @@ public class AisCoverageConfiguration {
     private WebServerConfiguration serverConfiguration;
     private double latSize = 0.0225225225;
     private double lonSize = 0.0386812541;
+    private int verbosityLevel;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
-    private HashMap<String, Source_UserProvided> sourcenames = new HashMap<String, Source_UserProvided>();
+    private Map<String, Source_UserProvided> sourcenames = new HashMap<String, Source_UserProvided>();
 
-    public HashMap<String, Source_UserProvided> getSourceNameMap() {
+    public Map<String, Source_UserProvided> getSourceNameMap() {
         return sourcenames;
     }
 
-    public void setSourceNameMap(HashMap<String, Source_UserProvided> map) {
+    public void setSourceNameMap(Map<String, Source_UserProvided> map) {
         sourcenames = map;
     }
 
@@ -110,6 +112,14 @@ public class AisCoverageConfiguration {
         JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
         Unmarshaller um = context.createUnmarshaller();
         return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
+    }
+
+    public int getVerbosityLevel() {
+        return verbosityLevel;
+    }
+
+    public void setVerbosityLevel(int verbosityLevel) {
+        this.verbosityLevel = verbosityLevel;
     }
 
 }

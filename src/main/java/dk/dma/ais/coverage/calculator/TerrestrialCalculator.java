@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import dk.dma.ais.coverage.Helper;
 import dk.dma.ais.coverage.data.CustomMessage;
 import dk.dma.ais.coverage.data.Ship;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
@@ -44,7 +45,7 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
  * Rotation is determined based on difference between course over ground (cog) from first and last message in buffer. If rotation is
  * ignored, missing points will only be calculated for ships that are NOT rotating.
  */
-public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
+public class TerrestrialCalculator extends AbstractCalculator {
 
     private static final long serialVersionUID = 1L;
     private int bufferInSeconds = 20;
@@ -61,6 +62,9 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
         }
     };
 
+    public TerrestrialCalculator(){
+        
+    }
     public void addListener(IAisEventListener l) {
         listeners.add(l);
     }
@@ -71,7 +75,7 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
         }
     }
 
-    public TerrestrialSuperSourceCalculator(boolean ignoreRotation) {
+    public TerrestrialCalculator(boolean ignoreRotation) {
         this.ignoreRotation = ignoreRotation;
     }
 
@@ -92,11 +96,8 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
      */
     public void calculate(CustomMessage message) {
 
-        if (checkDoublets(message)) {
-            return;
-        }
 
-        Ship ship = dataHandler.getShip(message.getSourceMMSI(), message.getShipMMSI());
+        Ship ship = dataHandler.getShip(message.getShipMMSI());
 
         // put message in ships' buffer
         ship.addToBuffer(message);
@@ -104,13 +105,13 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
         // If this message is filtered, we empty the ships' buffer and returns
         if (filterMessage(message)) {
             ship.emptyBuffer();
-            List<CustomMessage> list = ship.getMessages();
-            for (CustomMessage m : list) {
-                this.broadcastEvent(new AisEvent(Event.AISMESSAGE_REJECTED, this, m));
-            }
             return;
         }
 
+        if(Helper.firstMessage == null){
+            Helper.firstMessage=Helper.getFloorDate(message.getTimestamp());
+        }
+        Helper.latestMessage = Helper.getFloorDate(message.getTimestamp());
         // Time difference between first and last message in buffer
         CustomMessage firstMessage = ship.getFirstMessageInBuffer();
         CustomMessage lastMessage = ship.getLastMessageInBuffer();
@@ -118,10 +119,11 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
         if (ship.getMessages().size() == 1) {
             return;
         }
-
-        double timeDifference = this.getTimeDifference(firstMessage, lastMessage);
+        
+        int timeDifference = this.getTimeDifference(firstMessage, lastMessage);
         // Check if it is time to process the buffer
         if (timeDifference >= bufferInSeconds) {
+            
 
             List<CustomMessage> buffer = ship.getMessages();
             double rotation = Math.abs(angleDiff(firstMessage.getCog(), lastMessage.getCog()));
@@ -151,21 +153,12 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
      */
     private void calculateMissingPoints(CustomMessage m1, CustomMessage m2, boolean rotating) {
 
-        Source source = dataHandler.getSource(m1.getSourceMMSI());
-        Ship ship = dataHandler.getShip(m1.getSourceMMSI(), m1.getShipMMSI());
+        Ship ship = dataHandler.getShip(m1.getShipMMSI());
 
-        // Get cell from first message and increment message count
-        // Cell cell = dataHandler.getCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
-        // if (cell == null) {
-        // cell = dataHandler.createCell(source.getIdentifier(), m1.getLatitude(), m1.getLongitude());
-        // }
-
-        dataHandler.getSource(source.getIdentifier()).incrementMessageCount(); // Hmm
-
-        dataHandler.incrementReceivedSignals(source.getIdentifier(), m1.getLatitude(), m1.getLongitude(), m1.getTimestamp());
-        // cell.incrementNOofReceivedSignals();
-        // dataHandler.updateCell(cell);
-        this.broadcastEvent(new AisEvent(Event.AISMESSAGE_APPROVED, this, m1));
+        dataHandler.incrementReceivedSignals(AbstractCalculator.SUPERSOURCE_MMSI, m1.getLatitude(), m1.getLongitude(), m1.getTimestamp());
+        approveMessage(m1);
+        
+        
 
         Long p1Time = m1.getTimestamp().getTime();
         Long p2Time = m2.getTimestamp().getTime();
@@ -201,133 +194,21 @@ public class TerrestrialSuperSourceCalculator extends AbstractCalculator {
                 double yMissing = getY(i * expectedTransmittingFrequency, p1Time, p2Time, p1Y, p2Y);
 
                 // Add number of missing messages to cell
-                // Cell c = dataHandler.getCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing),
-                // projection.x2Lon(xMissing, yMissing));
-                // if (c == null) {
-                // c = dataHandler.createCell(source.getIdentifier(), projection.y2Lat(xMissing, yMissing),
-                // projection.x2Lon(xMissing, yMissing));
-                // }
-                // TODO shipslist in cell current not used?
-                // c.getShips().put(m1.getShip().getMmsi(), m1.getShip());
-                // c.incrementNOofMissingSignals();
-                // dataHandler.updateCell(c);
                 Date stamp = new Date((long) (m1.getTimestamp().getTime() + (i * expectedTransmittingFrequency * 1000)));
-                dataHandler.incrementMissingSignals(source.getIdentifier(), projection.y2Lat(xMissing, yMissing),
+                dataHandler.incrementMissingSignals(AbstractCalculator.SUPERSOURCE_MMSI, projection.y2Lat(xMissing, yMissing),
                         projection.x2Lon(xMissing, yMissing), stamp);
             }
         }
     }
 
-    /**
-     * We need to override; we only need one source. Instead of distributing the messages to the "origin source", we distribute to
-     * the super source.
-     */
-    @Override
-    public CustomMessage aisToCustom(AisMessage aisMessage, String defaultID) {
-
-        // Stops analysis if project has been running longer than timeout
-        // long timeSinceStart = project.getRunningTime();
-        // if (project.getTimeout() != -1 && timeSinceStart > project.getTimeout())
-        // project.stopAnalysis();
-
-        String baseId = null;
-        // ReceiverType receiverType = ReceiverType.NOTDEFINED;
-        AisPositionMessage posMessage = null;
-        // Position pos = null;
-        Date timestamp = null;
-        ShipClass shipClass = null;
-
-        // Get source tag properties
-        IProprietarySourceTag sourceTag = aisMessage.getSourceTag();
-        if (sourceTag != null) {
-            Integer bsmmsi = sourceTag.getBaseMmsi();
-            bsmmsi = -666;
-            timestamp = sourceTag.getTimestamp();
-            // srcCountry = sourceTag.getCountry();
-            // String region = sourceTag.getRegion();
-            // TODO update code to fit supersourcecalculator
-            // if (bsmmsi == null) {
-            // if (!region.equals("")) {
-            // baseId = region;
-            // receiverType = ReceiverType.REGION;
-            // }
-            // } else {
-            baseId = bsmmsi + "";
-            // receiverType = ReceiverType.BASESTATION;
-            // }
+ 
+    private void approveMessage(CustomMessage approvedMessage) {
+        for (String source : approvedMessage.getSourceList()) {
+            dataHandler.incrementReceivedSignals(source, approvedMessage.getLatitude(),
+                    approvedMessage.getLongitude(), approvedMessage.getTimestamp());
+            
         }
-
-        // Checks if its neither a basestation nor a region
-        if (baseId == null) {
-            baseId = defaultID;
-        }
-
-        // If time stamp is not present, we add one
-        if (timestamp == null) {
-            timestamp = new Date();
-        }
-
-        // It's a base station positiion message
-        if (aisMessage instanceof AisMessage4) {
-            extractBaseStationPosition((AisMessage4) aisMessage);
-            return null;
-        }
-
-        // if no allowed ship types has been set, we process all ship types
-        // if(!isShipAllowed(aisMessage))
-        // return null;
-
-        // Handle position messages. If it's not a position message
-        // the calculators can't use them
-        if (aisMessage instanceof AisPositionMessage) {
-            posMessage = (AisPositionMessage) aisMessage;
-        } else {
-            return null;
-        }
-
-        // Check if ship type is allowed
-        // shipClass = extractShipClass(aisMessage);
-        // if(!allowedShipClasses.containsKey(shipClass))
-        // return null;
-
-        // Check if position is valid
-        if (!posMessage.isPositionValid()) {
-            return null;
-        }
-
-        // Get location
-        // pos = posMessage.getPos().getGeoLocation();
-
-        // calculate lat lon size based on first message
-        // if(firstMessage == null){
-        // calculateLatLonSize(pos.getLatitude());
-        // }
-
-        // Extract Base station
-        Source baseStation = extractBaseStation("supersource", ReceiverType.NOTDEFINED);
-
-        // Extract ship
-        Ship ship = extractShip(aisMessage.getUserId(), shipClass, baseStation);
-
-        CustomMessage newMessage = new CustomMessage();
-        newMessage.setCog((double) posMessage.getCog() / 10);
-        newMessage.setSog((double) posMessage.getSog() / 10);
-        newMessage.setLatitude(posMessage.getPos().getGeoLocation().getLatitude());
-        newMessage.setLongitude(posMessage.getPos().getGeoLocation().getLongitude());
-        newMessage.setTimestamp(timestamp);
-        newMessage.setSourceMMSI(baseStation.getIdentifier());
-        newMessage.setShipMMSI(ship.getMmsi());
-        // newMessage.setOriginalMessage(aisMessage); //impacts performance if this is set. Only for test purposes
-        newMessage.setKey(messageToKey(newMessage));
-
-        // Keep track of current message
-        currentMessage = newMessage;
-
-        // Keep track of first message
-        if (firstMessage == null) {
-            firstMessage = newMessage;
-        }
-        return newMessage;
+//        System.out.println();
     }
 
     /**

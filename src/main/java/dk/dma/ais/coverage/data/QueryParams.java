@@ -16,12 +16,11 @@
 package dk.dma.ais.coverage.data;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 public class QueryParams {
     public Double latStart, lonStart, latEnd, lonEnd;
-    public Map<String, Boolean> sources = new HashMap<String, Boolean>();
+    public Set<String> sources;
     public Integer multiplicationFactor;
     public Date startDate, endDate;
 }
