@@ -26,7 +26,7 @@ public class Source implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private Map<String, Cell> grid = new ConcurrentHashMap<String, Cell>();
-    private String name = "";
+    private String name = "Unknown";
     private String identifier;
     private double latitude;
     private double longitude;

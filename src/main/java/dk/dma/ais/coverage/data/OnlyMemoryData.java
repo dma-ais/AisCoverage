@@ -230,12 +230,13 @@ public class OnlyMemoryData implements ICoverageData {
         //Determine source mmsi and receivertype    
         if (sourceTag != null) {
             timestamp = sourceTag.getTimestamp();
-            if(sourceTag.getBaseMmsi() != null){ //it's a base station
-                baseId=sourceTag.getBaseMmsi()+"";   
-                receiverType = ReceiverType.BASESTATION;
-            }else if(!sourceTag.getRegion().equals("")){ //It's a region
+            if(!sourceTag.getRegion().equals("")){ //It's a region
                 baseId=sourceTag.getRegion();
                 receiverType=ReceiverType.REGION;
+            }
+            else if(sourceTag.getBaseMmsi() != null){ //it's a base station
+                baseId=sourceTag.getBaseMmsi()+"";   
+                receiverType = ReceiverType.BASESTATION;
             }
         }
 
@@ -250,17 +251,20 @@ public class OnlyMemoryData implements ICoverageData {
             Helper.firstMessage = Helper.getFloorDate(timestamp);
         }
 
-        // It's a base station position message
+        // A source sent it's position..
         if (aisMessage instanceof AisMessage4) {
-            Source b = getSource(baseId);
+            
             AisMessage4 m = (AisMessage4) aisMessage;
-            if (conf.getSourceNameMap() != null && conf.getSourceNameMap().containsKey(baseId)) {
-                //user already provided name and location for this source
-            } else if (b != null) {
+            Source b = getSource(m.getUserId()+"");
+            if(b != null) {
                 Position pos = m.getPos().getGeoLocation();
                 if (pos != null ) {
-                    b.setLatitude(m.getPos().getGeoLocation().getLatitude());
-                    b.setLongitude(m.getPos().getGeoLocation().getLongitude());
+                    if(b.getLatitude() == 0){
+                       b.setLatitude(m.getPos().getGeoLocation().getLatitude());
+                    }
+                    if(b.getLongitude() == 0){
+                        b.setLongitude(m.getPos().getGeoLocation().getLongitude());
+                    }
                 }
             }
             return null;

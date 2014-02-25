@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<aisCoverageConfiguration>
+    <aisbus>
+        <transformer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="sourceTypeSatTransformerConfiguration">
+            <gh_region>802</gh_region>
+            <gh_region>804</gh_region>
+            <gh_region>810</gh_region>
+            <source>ORBCOMM999</source>
+        </transformer>
+        <busPullMaxElements>1000</busPullMaxElements>
+        <busQueueSize>10000</busQueueSize>
+        <consumer xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="distributerConsumerConfiguration">
+            <name>UNFILTERED</name>
+            <consumerPullMaxElements>1000</consumerPullMaxElements>
+            <consumerQueueSize>10000</consumerQueueSize>
+        </consumer>
+        <provider xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="fileReaderProviderConfiguration">
+            <filename>d:\Søfart\putty.log</filename>
+            <gzip>false</gzip>
+        </provider>
+    </aisbus>
+    <databaseConfiguration>
+        <addr>localhost</addr>
+        <dbName>nordicCoverage</dbName>
+        <port>5000</port>
+        <type>MemoryOnly</type>
+    </databaseConfiguration>
+    <latSize>0.0225225225</latSize>
+    <lonSize>0.0386812541</lonSize>
+    <serverConfiguration>
+        <contextPath>/coverage</contextPath>
+        <port>8091</port>
+        <webappPath>web</webappPath>
+    </serverConfiguration>
+    <sourceNameMap>
+        <entry>
+            <key>804</key>
+            <value>
+                <latitude>0.0</latitude>
+                <longitude>0.0</longitude>
+                <name></name>
+            </value>
+        </entry>
+    </sourceNameMap>
+    <verbosityLevel>0</verbosityLevel>
+</aisCoverageConfiguration>

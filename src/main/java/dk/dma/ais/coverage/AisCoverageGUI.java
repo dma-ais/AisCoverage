@@ -15,10 +15,14 @@
  */
 package dk.dma.ais.coverage;
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.dma.ais.coverage.gui.MainFrame;
+import dk.dma.ais.coverage.gui.StartGUI;
 
 /**
  * Coverage analyzer GUI
@@ -29,11 +33,27 @@ public class AisCoverageGUI {
 
     public static void main(String[] args) {
         LOG.info("Starting AisCoverageGUI");
+        try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         // Schedule a job for the event-dispatching thread:
         // creating and showing this application's GUI.
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new MainFrame();
+                StartGUI g = new StartGUI("DefaultConf.xml");
             }
         });
     }
