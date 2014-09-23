@@ -13,6 +13,4 @@ if [ "${CONFIGURL}" ]; then
 	CONFIG="CONFIG.xml"
 fi
 
-pwd
-ls .
 /bin/bash coverage.sh -file $CONFIG
