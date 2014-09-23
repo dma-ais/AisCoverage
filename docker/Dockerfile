@@ -1,6 +1,7 @@
 FROM kaspernielsen/javabox
 
 RUN apt-get install maven -y
+RUN apt-get install curl -y
 RUN mkdir -p /data
 RUN git clone https://github.com/dma-ais/AisCoverage /AisCoverage
 RUN (cd /AisCoverage; mvn clean install)
