@@ -181,7 +181,7 @@ function CoverageUI () {
     	function loopFunction () {;
 	    	if(self.changed){
 	    		self.drawCoverage();
-	    		self.updateSlidingWindow();
+	    		//self.updateSlidingWindow();
 	    		self.changed = false;
 	    	}
     		myTimeout = setTimeout(loopFunction, 2000);
@@ -202,7 +202,7 @@ function CoverageUI () {
         	
         	//draw coverage
     		coverageUI.drawCoverage();
-    		self.updateSlidingWindow();
+    		//self.updateSlidingWindow();
     		
         });
     }
