@@ -33,7 +33,8 @@ import dk.dma.ais.coverage.data.Source_UserProvided;
 import dk.dma.ais.coverage.web.WebServerConfiguration;
 
 /**
- * Class to represent AIS coverage configuration. To be marshalled and unmarshalled by JAXB.
+ * Class to represent AIS coverage configuration. To be marshalled and
+ * unmarshalled by JAXB.
  */
 @XmlRootElement
 public class AisCoverageConfiguration {
@@ -46,7 +47,7 @@ public class AisCoverageConfiguration {
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
     private Map<String, Source_UserProvided> sourcenames = new HashMap<String, Source_UserProvided>();
     private int windowSize = 5;
-    
+
     public Map<String, Source_UserProvided> getSourceNameMap() {
         return sourcenames;
     }
@@ -80,7 +81,8 @@ public class AisCoverageConfiguration {
         return serverConfiguration;
     }
 
-    public void setServerConfiguration(WebServerConfiguration serverConfiguration) {
+    public void setServerConfiguration(
+            WebServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
     }
 
@@ -100,18 +102,23 @@ public class AisCoverageConfiguration {
         return this.lonSize;
     }
 
-    public static void save(String filename, AisCoverageConfiguration conf) throws JAXBException, FileNotFoundException {
-        JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
+    public static void save(String filename, AisCoverageConfiguration conf)
+            throws JAXBException, FileNotFoundException {
+        JAXBContext context = JAXBContext
+                .newInstance(AisCoverageConfiguration.class);
         Marshaller m = context.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         m.marshal(conf, new FileOutputStream(new File(filename)));
     }
 
-    public static AisCoverageConfiguration load(String filename) throws JAXBException, FileNotFoundException {
-        JAXBContext context = JAXBContext.newInstance(AisCoverageConfiguration.class);
+    public static AisCoverageConfiguration load(String filename)
+            throws JAXBException, FileNotFoundException {
+        JAXBContext context = JAXBContext
+                .newInstance(AisCoverageConfiguration.class);
         Unmarshaller um = context.createUnmarshaller();
-        return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(new File(filename)));
+        return (AisCoverageConfiguration) um.unmarshal(new FileInputStream(
+                new File(filename)));
     }
 
     public int getVerbosityLevel() {
@@ -122,12 +129,12 @@ public class AisCoverageConfiguration {
         this.verbosityLevel = verbosityLevel;
     }
 
-	public int getWindowSize() {
-		return windowSize;
-	}
+    public int getWindowSize() {
+        return windowSize;
+    }
 
-	public void setWindowSize(int windowSize) {
-		this.windowSize = windowSize;
-	}
+    public void setWindowSize(int windowSize) {
+        this.windowSize = windowSize;
+    }
 
 }
