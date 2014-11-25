@@ -103,6 +103,11 @@ public class CoverageHandler {
         if (conf.getVerbosityLevel() > 0) {
             verboseDebug();
         }
+        
+        // window size
+        LOG.info("Max window size is " + conf.getWindowSize()+" hours");
+        Purger purger = new Purger(conf.getWindowSize(), dataHandler, 5);
+        purger.start();
 
     }
 

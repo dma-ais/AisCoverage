@@ -17,13 +17,19 @@ package dk.dma.ais.coverage.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dk.dma.ais.coverage.AisCoverage;
 import dk.dma.ais.coverage.Helper;
+import dk.dma.ais.coverage.Purger;
 import dk.dma.ais.coverage.calculator.AbstractCalculator;
 import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.coverage.data.Ship.ShipClass;
@@ -38,6 +44,7 @@ import dk.dma.ais.proprietary.IProprietarySourceTag;
 import dk.dma.enav.model.geometry.Position;
 
 public class OnlyMemoryData implements ICoverageData {
+	private static final Logger LOG = LoggerFactory.getLogger(OnlyMemoryData.class);
 
     private Map<Integer, Ship> ships = new ConcurrentHashMap<Integer, Ship>();
     private ConcurrentHashMap<String, Source> sources = new ConcurrentHashMap<String, Source>();
@@ -317,5 +324,63 @@ public class OnlyMemoryData implements ICoverageData {
         
         return newMessage;
     }
+
+	@Override
+	public void trimWindow(Date trimPoint) {
+		int hoursToRemove = (int) (trimPoint.getTime()-Helper.getFloorDate(Helper.firstMessage).getTime())/1000/60/60;
+
+		long fixedTimeSpansRemoved = 0;
+		long dynamicTimeSpansRemoved = 0;
+		long cellsRemoved = 0;
+		
+		//Remove ship locations that have not been send within the trimmed window
+		//if ship has no location registrations within trimmed window AND
+		// has no messages in buffer within trimmed window, delete ship
+		
+		//Remove Timespans that are not within the trimmed window (for each cell)
+		//if cell has no timespan, delete cell
+		for (Source source : sources.values()) {
+			for(Iterator<Map.Entry<String, Cell>> it = source.getGrid().entrySet().iterator(); it.hasNext(); ) {
+//			for (Entry<String, Cell> entry : source.getGrid().entrySet()) {
+				Entry<String, Cell> entry = it.next();
+				Cell cell = entry.getValue();
+				
+				for (int i = 0; i < hoursToRemove; i++) {
+					Long key = Helper.getFloorDate(Helper.firstMessage).getTime()+(i*1000*60*60);
+					if(cell.getFixedWidthSpans().containsKey(key)){
+						cell.getFixedWidthSpans().remove(key);
+						fixedTimeSpansRemoved++;
+					}
+					
+				}
+				int numberToRemove = 0;
+				if(cell.getTimeSpans() != null){
+					for (TimeSpan timespan : cell.getTimeSpans()) {
+						if(timespan.getLastMessage().getTime() < trimPoint.getTime()){
+							numberToRemove++;
+						}else{
+							break;
+						}
+					}
+					for (int i = 0; i < numberToRemove; i++) {
+						cell.getTimeSpans().remove(0);
+						dynamicTimeSpansRemoved++;
+					}
+				}
+				
+				if( (cell.getFixedWidthSpans() == null || cell.getFixedWidthSpans().isEmpty()) && 
+					(cell.getTimeSpans() == null || cell.getTimeSpans().isEmpty())){
+					cellsRemoved++;
+					source.getGrid().remove(entry.getKey());	
+				}		
+			}	
+		}
+		
+		//Update Helper-thingie
+		//Don't think this will create concurrency issues...
+		Helper.firstMessage = trimPoint;
+		
+		LOG.info("Purging done. cells removed: {}, fixed timespans removed: {}, dynamic timespans removed: {}", cellsRemoved, fixedTimeSpansRemoved, dynamicTimeSpansRemoved);
+	}
 
 }

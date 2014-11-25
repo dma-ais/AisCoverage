@@ -37,5 +37,6 @@ public interface ICoverageData {
     Collection<Source> getSources();
     void incrementReceivedSignals(String sourceMmsi, double lat, double lon, Date timestamp);
     void incrementMissingSignals(String sourceMmsi, double lat, double lon, Date timestamp);
+    void trimWindow(Date trimPoint);
 
 }

@@ -45,7 +45,8 @@ public class AisCoverageConfiguration {
     private int verbosityLevel;
     private DatabaseConfiguration dbConf = new DatabaseConfiguration();
     private Map<String, Source_UserProvided> sourcenames = new HashMap<String, Source_UserProvided>();
-
+    private int windowSize = 5;
+    
     public Map<String, Source_UserProvided> getSourceNameMap() {
         return sourcenames;
     }
@@ -120,5 +121,13 @@ public class AisCoverageConfiguration {
     public void setVerbosityLevel(int verbosityLevel) {
         this.verbosityLevel = verbosityLevel;
     }
+
+	public int getWindowSize() {
+		return windowSize;
+	}
+
+	public void setWindowSize(int windowSize) {
+		this.windowSize = windowSize;
+	}
 
 }

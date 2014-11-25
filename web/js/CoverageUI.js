@@ -181,7 +181,7 @@ function CoverageUI () {
     	function loopFunction () {;
 	    	if(self.changed){
 	    		self.drawCoverage();
-//	    		self.updateSlidingWindow();
+	    		self.updateSlidingWindow();
 	    		self.changed = false;
 	    	}
     		myTimeout = setTimeout(loopFunction, 2000);
@@ -202,6 +202,7 @@ function CoverageUI () {
         	
         	//draw coverage
     		coverageUI.drawCoverage();
+    		self.updateSlidingWindow();
     		
         });
     }
@@ -259,12 +260,14 @@ function CoverageUI () {
     		endDate.setMinutes(0);
     		endDate.setSeconds(0);
     		endDate.setMilliseconds(0);
+    		
     		self.setupSlidingWindow(startDate, endDate);
 //    		alert(startDate);
 //    		alert(endDate);
 //    		alert(data.firstMessage);
     	});
     }
+   
     this.setupSlidingWindow = function(startDate, endDate){
     	$('.slidingWindowLabel').hide();
     	$( "#globalStarTime" ).html(self.formatDate(startDate));
@@ -305,10 +308,16 @@ function CoverageUI () {
 	    	
 	    	
     	}
-    	var defaultFirstValue = timeDif-6;
-    	var defaultSecondValue = timeDif;	
-    	if(timeDif < 6){ defaultFirstValue = 0; }
+    	if (typeof defaultFirstValue === "undefined") {
+    		defaultFirstValue = timeDif-6;
+        	defaultSecondValue = timeDif;	
+        	if(timeDif < 6){ defaultFirstValue = 0; }
+        	
+    	}else{
+    		//console.log(selectedStartDate);
+    	}
     	updateLabels(defaultFirstValue,defaultSecondValue);
+    	
     	
     	$( "#slidingWindow" ).dragslider({
     		range: true,
@@ -321,6 +330,7 @@ function CoverageUI () {
                     // do not allow change
                     return false;
                 }
+    	    	self.canUpdate = true;
     	    	updateLabels(ui.values[ 0 ],ui.values[ 1 ]);
         	},
 	    	change: function(event, ui){
@@ -338,7 +348,11 @@ function CoverageUI () {
 		    	if(shiptrackactive==true){
 		    		self.updateShipTrack();
 		    	}
-	    		self.changed = true;
+		    	if(self.canUpdate){
+		    		self.changed = true;
+		    		self.canUpdate = false;
+		    	}
+	    		
 	    	}
     	});
     	
@@ -360,6 +374,8 @@ function CoverageUI () {
         		}
     		},1000);
     	});
+    	
+    	console.log("sliding window updated");
     }
 
     this.formatDate = function(date){
