@@ -1,16 +1,10 @@
 #!/bin/bash
 
-cd /ais-coverage
-
-sed -i "s/PLACEHOLDER/${SERVER}:${PORT}/g" CONFIG_BASE.xml
-sed -i "s/<source>.*<\/source>/<source>${SOURCE_NAME}<\/source>/g" CONFIG_BASE.xml
-
-
-
-CONFIG="CONFIG_BASE.xml"
-if [ "${CONFIGURL}" ]; then 
-	curl -sS $CONFIGURL > CONFIG.xml
-	CONFIG="CONFIG.xml"
+if [ ! -f "${CONFIG}" ]; then 
+	#create default configuration
+	cp /target/ais-coverage-0.2-SNAPSHOT-dist/ais-coverage-0.2-SNAPSHOT/coverage-fromtcp-sample.xml $CONFIG
 fi
+
+cd /target/ais-coverage*/*/
 
 /bin/bash coverage.sh -file $CONFIG
