@@ -2,7 +2,7 @@
 
 if [ -z $JAVA_OPTS ]
 then
-	JAVA_OPTS="-Xmn256M -Xms512M -Xmx1024M"
+	JAVA_OPTS="-Xmn256M -Xms512M"
 fi
 
 if [ -z $LOG_CONF ]
