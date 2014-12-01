@@ -23,6 +23,11 @@ body {
 	-o-user-select: none;
 }
 
+#OpenLayers_Map_2_OpenLayers_ViewPort {
+	/* quick fix for hidden gui elements */
+	z-index: 0;
+}
+
 #statusPanel {
 	width: 150px;
 	padding: 4px;
