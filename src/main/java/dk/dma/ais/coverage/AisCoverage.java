@@ -14,6 +14,8 @@
  */
 package dk.dma.ais.coverage;
 
+import java.util.function.Consumer;
+
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
@@ -26,7 +28,7 @@ import dk.dma.ais.coverage.configuration.AisCoverageConfiguration;
 import dk.dma.ais.coverage.web.WebServer;
 import dk.dma.ais.packet.AisPacket;
 import dk.dma.ais.reader.AisReader;
-import dk.dma.enav.util.function.Consumer;
+
 
 /**
  * AIS coverage analyzer
