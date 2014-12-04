@@ -51,12 +51,12 @@
 		<dependency>
 			<groupId>dk.dma.commons</groupId>
 			<artifactId>dma-commons-app</artifactId>
-			<version>0.1</version>
+			<version>0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>dk.dma.enav</groupId>
 			<artifactId>enav-model</artifactId>
-			<version>0.3</version>
+			<version>0.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
